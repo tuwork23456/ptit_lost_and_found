@@ -1,0 +1,20 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual env
+venv/
+env/
+
+# Env config
+.env
+.env.*
+
+# Database local
+*.db
+*.sqlite3
+
+# Logs
+*.log

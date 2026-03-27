@@ -1,0 +1,134 @@
+@import "tailwindcss";
+
+body {
+  background-color: #edeff1;
+}
+
+.btn-search {
+  background: linear-gradient(135deg, #d1fae5 0%, #bbf7d0 100%);
+
+  color: #065f46;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+
+  display: inline-flex;
+  align-items: center;
+  padding: 9px 20px;
+  border-radius: 12px;
+
+  border: 1px solid #a7f3d0;
+
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-search:hover {
+  transform: scale(0.96);
+  background: linear-gradient(135deg, #a7f3d0 0%, #86efac 100%);
+}
+
+.icon-search {
+  margin-right: 8px;
+  stroke: #064e3b;
+}
+
+/* Custom Animations cho Hero Banner */
+
+@keyframes twinkle {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+    filter: drop-shadow(0 0 2px rgba(255, 215, 0, 0.7));
+  }
+  50% {
+    transform: scale(1.4) rotate(15deg);
+    opacity: 0.8;
+    filter: drop-shadow(0 0 10px rgba(255, 223, 0, 1));
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px) translateX(0px);
+  }
+  50% {
+    transform: translateY(-25px) translateX(15px);
+  }
+}
+
+@keyframes pulse-slow {
+  0%,
+  100% {
+    opacity: 0.1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.25;
+    transform: scale(1.15);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%) skewX(-15deg);
+  }
+  100% {
+    transform: translateX(200%) skewX(-15deg);
+  }
+}
+
+/* Helper Classes để dùng trong React */
+.animate-twinkle {
+  animation: twinkle 2.5s infinite ease-in-out;
+}
+
+.animate-twinkle-delayed {
+  animation: twinkle 2.5s infinite ease-in-out 1.2s;
+}
+
+.animate-float-slow {
+  animation: float 7s infinite ease-in-out;
+}
+
+.animate-float-medium {
+  animation: float 5s infinite ease-in-out 1s;
+}
+
+.animate-pulse-bg {
+  animation: pulse-slow 8s infinite ease-in-out;
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}
+
+/* Custom Scrollbar cho Sidebar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #e5e7eb;
+}
+
+/* Đảm bảo nội dung không bị vỡ khi cuộn trên Firefox */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #f1f1f1 transparent;
+}
