@@ -1,0 +1,12 @@
+# Virtual environments (repo root)
+.venv/
+venv/
+env/
+
+# User uploads (runtime)
+backend/app/uploads/
+Frontend/uploaded_files/
+
+# OS / editor (optional hygiene)
+.DS_Store
+Thumbs.db

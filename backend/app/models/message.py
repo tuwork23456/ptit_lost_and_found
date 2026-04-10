@@ -8,9 +8,12 @@ class Message(Base):
 
     id = Column(Integer, primary_key=True)
     content = Column(String)
+    message_type = Column(String, default="text", nullable=False)  # text / context
 
     sender_id = Column(Integer, ForeignKey("users.id"))
     receiver_id = Column(Integer, ForeignKey("users.id"))
+    post_id = Column(Integer, ForeignKey("posts.id"), nullable=True)
+    post_title = Column(String, nullable=True)
 
     # THÊM MỚI: Cột is_read để đếm tin nhắn chưa đọc (cho icon Chat)
     is_read = Column(Boolean, default=False)

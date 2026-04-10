@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 from app.schemas.userschemas import UserResponse
 
@@ -21,7 +21,23 @@ class PostResponse(PostBase):
     user_id: int       
     created_at: datetime
     is_resolved: bool = False
+    moderation_status: str = "APPROVED"
+    moderation_note: Optional[str] = None
+    moderated_by: Optional[int] = None
+    moderated_at: Optional[datetime] = None
     owner: Optional[UserResponse] = None
 
     class Config:
         from_attributes = True 
+
+
+class PostModerationRequest(BaseModel):
+    action: str  # approve / reject / remove
+    note: Optional[str] = None
+
+
+class PostSearchResponse(BaseModel):
+    items: List[PostResponse]
+    total: int
+    page: int
+    limit: int

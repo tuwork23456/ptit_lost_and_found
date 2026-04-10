@@ -22,11 +22,12 @@ def create_new_comment(
         db=db,
         content=comment_data.content,
         user_id=current_user.id,  # Lấy từ token, an toàn hơn
-        post_id=comment_data.post_id
+        post_id=comment_data.post_id,
+        parent_comment_id=comment_data.parent_comment_id,
     )
 
     if not comment:
-        raise HTTPException(status_code=404, detail="Post not found")
+        raise HTTPException(status_code=404, detail="Post not found or invalid parent comment")
 
     return comment
 

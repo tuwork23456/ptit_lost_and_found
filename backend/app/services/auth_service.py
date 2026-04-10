@@ -2,15 +2,16 @@ from sqlalchemy.orm import Session
 from app.models.user import User
 from app.schemas.userschemas import UserCreate
 # Import các hàm bảo mật từ folder core mới tạo
-from app.core.security import hash_password, verify_password, create_access_token
+from app.core.security import hash_password, verify_password
 
 # =======================
 # LOGIC ĐĂNG KÝ
 # =======================
 def register_user_logic(db: Session, user_data: UserCreate):
     try:
+        normalized_email = str(user_data.email).strip().lower()
         # 1. Check email tồn tại
-        existing_user = db.query(User).filter(User.email == user_data.email).first()
+        existing_user = db.query(User).filter(User.email == normalized_email).first()
         if existing_user:
             raise ValueError("Email already exists")
 
@@ -20,8 +21,9 @@ def register_user_logic(db: Session, user_data: UserCreate):
         # 3. Tạo user object từ SQLAlchemy model
         new_user = User(
             username=user_data.username,
-            email=user_data.email,
-            password_hash=hashed_password
+            email=normalized_email,
+            password_hash=hashed_password,
+            role="USER",
         )
 
         # 4. Lưu DB
@@ -45,8 +47,9 @@ def authenticate_user_logic(db: Session, email: str, password: str):
     Nếu đúng, trả về object User. Nếu sai, trả về None.
     """
     try:
+        normalized_email = str(email).strip().lower()
         # 1. Tìm user theo email
-        user = db.query(User).filter(User.email == email).first()
+        user = db.query(User).filter(User.email == normalized_email).first()
         if not user:
             return None # Không tìm thấy user
 

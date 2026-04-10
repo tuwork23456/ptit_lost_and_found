@@ -11,29 +11,43 @@ router = APIRouter(prefix="/notifications", tags=["notifications"])
 
 @router.get("", response_model=List[NotificationResponse])
 def get_notifications(
-    db: Session = Depends(get_db), 
+    db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    notifications = db.query(Notification).filter(Notification.user_id == current_user.id).order_by(Notification.created_at.desc()).all()
+    notifications = (
+        db.query(Notification)
+        .filter(Notification.user_id == current_user.id)
+        .order_by(Notification.created_at.desc())
+        .all()
+    )
     return notifications
 
-@router.put("/{notification_id}/read")
-def mark_notification_read(
-    notification_id: int, 
-    db: Session = Depends(get_db), 
-    current_user: User = Depends(get_current_user)
-):
-    notif = db.query(Notification).filter(Notification.id == notification_id, Notification.user_id == current_user.id).first()
-    if notif:
-        notif.is_read = True
-        db.commit()
-    return {"message": "Success"}
 
+# QUAN TRỌNG: /read-all phải khai báo TRƯỚC /{notification_id}/read
+# Nếu đặt sau, FastAPI sẽ match "read-all" như int notification_id → HTTP 422
 @router.put("/read-all")
 def mark_all_read(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    db.query(Notification).filter(Notification.user_id == current_user.id).update({"is_read": True})
+    db.query(Notification).filter(
+        Notification.user_id == current_user.id
+    ).update({"is_read": True})
     db.commit()
+    return {"message": "Success"}
+
+
+@router.put("/{notification_id}/read")
+def mark_notification_read(
+    notification_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    notif = db.query(Notification).filter(
+        Notification.id == notification_id,
+        Notification.user_id == current_user.id
+    ).first()
+    if notif:
+        notif.is_read = True
+        db.commit()
     return {"message": "Success"}

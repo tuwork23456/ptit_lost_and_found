@@ -4,16 +4,21 @@ from app.models.post import Post
 from app.models.notification import Notification
 
 
-def create_comment(db: Session, content, user_id, post_id):
+def create_comment(db: Session, content, user_id, post_id, parent_comment_id=None):
     post = db.query(Post).filter(Post.id == post_id).first()
     if not post:
         return None
+    parent_comment = None
+    if parent_comment_id:
+        parent_comment = db.query(Comment).filter(Comment.id == parent_comment_id).first()
+        if not parent_comment or parent_comment.post_id != post_id:
+            return None
 
-    # 1. TẠO COMMENT TRƯỚC
     comment = Comment(
         content=content,
         user_id=user_id,
-        post_id=post_id
+        post_id=post_id,
+        parent_comment_id=parent_comment_id,
     )
     db.add(comment)
 
@@ -35,17 +40,29 @@ def create_comment(db: Session, content, user_id, post_id):
     if post.user_id != user_id:
         owner_notification = Notification(
             user_id=post.user_id,
-            message=f"{post.title} đã thêm 1 comment",
+            message=f"Co binh luan moi trong bai: {post.title}",
             type="COMMENT",
             target_id=post_id
         )
         db.add(owner_notification)
 
-    # B. Tạo thông báo cho TẤT CẢ NGƯỜI TỪNG COMMENT (Followers)
+    # B. Tạo thông báo cho người được trả lời trực tiếp
+    if parent_comment and parent_comment.user_id not in {user_id, post.user_id}:
+        reply_notification = Notification(
+            user_id=parent_comment.user_id,
+            message=f"Co phan hoi moi trong binh luan cua ban tai bai: {post.title}",
+            type="COMMENT",
+            target_id=post_id
+        )
+        db.add(reply_notification)
+
+    # C. Tạo thông báo cho TẤT CẢ NGƯỜI TỪNG COMMENT (Followers)
     for f_id in follower_ids:
+        if parent_comment and f_id == parent_comment.user_id:
+            continue
         follower_notification = Notification(
             user_id=f_id,
-            message=f"{post.title} đã thêm 1 comment",
+            message=f"Co binh luan moi trong bai: {post.title}",
             type="COMMENT",
             target_id=post_id
         )
@@ -58,7 +75,7 @@ def create_comment(db: Session, content, user_id, post_id):
 
 
 def get_comments_by_post_id(db: Session, post_id: int):
-    return db.query(Comment).filter(Comment.post_id == post_id).all()
+    return db.query(Comment).filter(Comment.post_id == post_id).order_by(Comment.created_at.asc()).all()
 
 
 def get_comment_by_id(db: Session, comment_id: int):

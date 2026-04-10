@@ -1,7 +1,9 @@
 from datetime import datetime, timedelta
+import os
 from typing import Any, Union
 from jose import jwt
 from passlib.context import CryptContext
+from dotenv import load_dotenv
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError
@@ -10,11 +12,13 @@ from app.database.database import get_db
 from app.models.user import User
 
 # --- CẤU HÌNH ---
-# TRONG THỰC TẾ, HÃY DÙNG BIẾN MÔI TRƯỜNG (.env) ĐỂ LƯU CÁC CÁI NÀY
-# Lệnh tạo key bí mật: openssl rand -hex 32
-SECRET_KEY = "Sieu_Mat_Khau_Cua_Btl_Python_Khong_Ai_Biet_Duoc_Dau_Nhe" 
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # Token có hiệu lực trong 7 ngày
+load_dotenv()
+SECRET_KEY = os.getenv("APP_SECRET_KEY")
+if not SECRET_KEY:
+    raise RuntimeError("Missing APP_SECRET_KEY environment variable")
+
+ALGORITHM = os.getenv("APP_JWT_ALGORITHM", "HS256")
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("APP_ACCESS_TOKEN_EXPIRE_MINUTES", "60"))
 
 # Dùng pbkdf2_sha256 thay vì bcrypt, vì bcrypt đang dính lỗi tương thích C-Extension (thường thấy với Python 3.12/3.13)
 # pbkdf2_sha256 dùng thư viện chuẩn hashlib của Python nên đảm bảo 100% không bao giờ gặp lỗi bộ nhớ hay độ dài vô lý.
@@ -69,17 +73,26 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         
         # 2. Lấy ID người dùng (trường 'sub')
         user_id: str = payload.get("sub")
-        if user_id is None:
+        token_type: str = payload.get("type")
+        if user_id is None or token_type != "access":
             raise credentials_exception
-            
-    except JWTError:
+
+        parsed_user_id = int(user_id)
+    except (JWTError, ValueError, TypeError):
         # Nếu token bị chỉnh sửa, sai định dạng, hoặc hết hạn -> văng lỗi ngay
         raise credentials_exception
 
     # 3. Dùng user_id truy vấn xuống Database để lấy đầy đủ thông tin User
-    user = db.query(User).filter(User.id == int(user_id)).first()
+    user = db.query(User).filter(User.id == parsed_user_id).first()
     if user is None:
         raise credentials_exception
 
     # 4. Trả về object User hợp lệ
     return user
+
+
+def is_admin_user(user: User) -> bool:
+    if not user:
+        return False
+    role = (getattr(user, "role", "") or "").strip().upper()
+    return role in {"ADMIN", "MOD"}

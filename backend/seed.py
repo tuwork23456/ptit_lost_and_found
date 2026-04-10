@@ -30,7 +30,8 @@ def seed_data():
         user = User(
             username=f"user{i}",
             email=f"user{i}@example.com",
-            password_hash=hash_password("123456") 
+            password_hash=hash_password("123456"),
+            role="USER",
         )
         db.add(user)
         users.append(user)

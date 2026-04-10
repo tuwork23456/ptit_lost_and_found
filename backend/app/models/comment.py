@@ -12,8 +12,10 @@ class Comment(Base):
 
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     post_id = Column(Integer, ForeignKey("posts.id"), nullable=False)
+    parent_comment_id = Column(Integer, ForeignKey("comments.id"), nullable=True)
 
     created_at = Column(DateTime, default=datetime.utcnow)
 
     user = relationship("User", back_populates="comments")
     post = relationship("Post", back_populates="comments")
+    parent_comment = relationship("Comment", remote_side=[id], backref="replies")
