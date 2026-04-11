@@ -21,7 +21,7 @@ def _feed_comment_item(comment: dict) -> rx.Component:
                         rx.cond(
                             is_reply & (reply_to != ""),
                             rx.hstack(
-                                rx.text("tra loi", class_name="text-[11px] text-slate-400"),
+                                rx.text("trả lời", class_name="text-[11px] text-slate-400"),
                                 rx.text(reply_to, class_name="text-[11px] text-slate-400"),
                                 spacing="1",
                             ),
@@ -32,7 +32,7 @@ def _feed_comment_item(comment: dict) -> rx.Component:
                     rx.hstack(
                         rx.text(comment.get("created_at"), class_name="text-xs text-slate-500"),
                         rx.el.button(
-                            "Tra loi",
+                            "Trả lời",
                             on_click=AppState.set_feed_reply_target(comment_id, comment.get("username")),
                             class_name="text-[11px] font-semibold text-[#ff4500] hover:underline",
                         ),
@@ -52,19 +52,19 @@ def _feed_comment_item(comment: dict) -> rx.Component:
                         rx.input(
                             value=AppState.feed_reply_text,
                             on_change=AppState.set_feed_reply_text,
-                            placeholder="Nhap tra loi...",
+                            placeholder="Nhập trả lời...",
                             class_name="w-full bg-white border border-slate-200 rounded-full px-4 py-2 text-sm",
                         ),
                         rx.hstack(
                             rx.spacer(),
                             rx.el.button(
-                                "Huy",
+                                "Hủy",
                                 type="button",
                                 on_click=AppState.cancel_feed_reply,
                                 class_name="px-3 py-1.5 text-xs rounded-full border border-slate-200 hover:bg-slate-50",
                             ),
                             rx.el.button(
-                                "Gui",
+                                "Gửi",
                                 type="submit",
                                 class_name="px-4 py-1.5 text-xs rounded-full bg-[#ff4500] text-white font-semibold hover:bg-[#e03d00]",
                             ),
@@ -91,7 +91,7 @@ def _feed_comments_modal() -> rx.Component:
             rx.el.div(
                 rx.el.div(
                     rx.hstack(
-                        rx.text("Binh luan", class_name="text-base font-bold text-slate-800"),
+                        rx.text("Bình luận", class_name="text-base font-bold text-slate-800"),
                         rx.spacer(),
                         rx.el.button(
                             "✕",
@@ -129,7 +129,7 @@ def _feed_comments_modal() -> rx.Component:
                 rx.el.div(
                     rx.cond(
                         AppState.feed_threaded_comments.length() == 0,
-                        rx.text("Chua co binh luan nao.", class_name="text-xs text-slate-400"),
+                        rx.text("Chưa có bình luận nào.", class_name="text-xs text-slate-400"),
                         rx.el.div(
                             rx.foreach(AppState.feed_threaded_comments, _feed_comment_item),
                             class_name="max-h-[360px] overflow-y-auto pr-1",
@@ -140,13 +140,13 @@ def _feed_comments_modal() -> rx.Component:
                 rx.form(
                     rx.hstack(
                         rx.input(
-                            placeholder="Viet binh luan...",
+                            placeholder="Viết bình luận...",
                             value=AppState.feed_comment_text,
                             on_change=AppState.set_feed_comment_text,
                             class_name="flex-1 bg-slate-50 border border-slate-200 rounded-full px-4 py-2 text-sm",
                         ),
                         rx.el.button(
-                            "Dang",
+                            "Đăng",
                             type="submit",
                             class_name="bg-[#ff4500] text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-[#e03d00]",
                         ),
@@ -177,12 +177,12 @@ def _feed_tabs() -> rx.Component:
 
     return rx.hstack(
         rx.el.h2(
-            "Ban tin",
+            "Bản tin",
             class_name="text-2xl md:text-[30px] font-black tracking-tight text-slate-800 mr-2",
         ),
         rx.hstack(
-            _tab("Mat do", "LOST"),
-            _tab("Nhat duoc", "FOUND"),
+            _tab("Mất đồ", "LOST"),
+            _tab("Nhặt được", "FOUND"),
             spacing="1",
             class_name="bg-slate-100 p-1 rounded-full",
         ),
@@ -196,11 +196,11 @@ def _feed_panel_header() -> rx.Component:
     return rx.el.div(
         rx.el.div(
             rx.el.span(
-                "Cong dong PTIT",
+                "Cộng đồng PTIT",
                 class_name="inline-flex items-center rounded-full bg-orange-50 border border-orange-200 text-[#ff4500] text-[11px] font-semibold px-2.5 py-1",
             ),
             rx.text(
-                "Ban tin tim do that lac danh cho sinh vien Hoc vien Cong nghe Buu chinh Vien thong.",
+                "Bản tin tìm đồ thất lạc dành cho sinh viên Học viện Công nghệ Bưu chính Viễn thông.",
                 class_name="text-sm text-slate-500 mt-2",
             ),
             class_name="w-full",
@@ -213,7 +213,7 @@ def _feed_panel_header() -> rx.Component:
 def _post_card(post: dict) -> rx.Component:
     post_id = post["id"].to_string()
     has_image = (post.get("image") != None) & (post.get("image") != "")
-    post_type = rx.cond(post.get("type") == "FOUND", "Nhat duoc", "Mat do")
+    post_type = rx.cond(post.get("type") == "FOUND", "Nhặt được", "Mất đồ")
     return rx.el.div(
         rx.el.div(
             rx.vstack(
@@ -241,7 +241,7 @@ def _post_card(post: dict) -> rx.Component:
             ),
             rx.el.div(
                 rx.hstack(
-                    rx.text("Nguoi dang:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
+                    rx.text("Người đăng:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
                     rx.text(post.get("username"), class_name="text-sm font-bold text-[#ff4500] truncate"),
                     spacing="2",
                     align="center",
@@ -249,7 +249,7 @@ def _post_card(post: dict) -> rx.Component:
                     class_name="mb-1.5",
                 ),
                 rx.hstack(
-                    rx.text("Tieu de:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
+                    rx.text("Tiêu đề:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
                     rx.text(
                         post["title"],
                         class_name="text-sm font-bold text-slate-900 truncate",
@@ -260,7 +260,7 @@ def _post_card(post: dict) -> rx.Component:
                     class_name="mb-1.5",
                 ),
                 rx.hstack(
-                    rx.text("Mo ta:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
+                    rx.text("Mô tả:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
                     rx.text(post["description"], class_name="text-sm text-slate-700 truncate"),
                     spacing="2",
                     align="center",
@@ -301,12 +301,12 @@ def _post_card(post: dict) -> rx.Component:
                 ),
                 rx.hstack(
                     rx.link(
-                        rx.hstack(rx.icon("info", size=14), rx.text("Chi tiet", class_name="text-xs"), spacing="1"),
+                        rx.hstack(rx.icon("info", size=14), rx.text("Chi tiết", class_name="text-xs"), spacing="1"),
                         href="/post/" + post_id,
                         class_name="text-slate-600 hover:text-[#ff4500] hover:bg-orange-50 px-2.5 py-1.5 rounded-lg transition",
                     ),
                     rx.el.button(
-                        rx.hstack(rx.icon("send", size=14), rx.text("Lien he", class_name="text-xs"), spacing="1"),
+                        rx.hstack(rx.icon("send", size=14), rx.text("Liên hệ", class_name="text-xs"), spacing="1"),
                         on_click=AppState.open_chat_with_user_from_post(
                             post.get("user_id"),
                             post.get("username"),
@@ -316,7 +316,7 @@ def _post_card(post: dict) -> rx.Component:
                         class_name="text-slate-600 hover:text-[#ff4500] hover:bg-orange-50 px-2.5 py-1.5 rounded-lg transition",
                     ),
                     rx.el.button(
-                        rx.hstack(rx.icon("message-circle", size=14), rx.text("Binh luan", class_name="text-xs"), spacing="1"),
+                        rx.hstack(rx.icon("message-circle", size=14), rx.text("Bình luận", class_name="text-xs"), spacing="1"),
                         on_click=AppState.open_feed_comments_modal(
                             post.get("id"),
                             post.get("title"),
@@ -331,7 +331,7 @@ def _post_card(post: dict) -> rx.Component:
                     rx.cond(
                         ~AppState.is_admin,
                         rx.el.button(
-                            rx.hstack(rx.icon("triangle-alert", size=14), rx.text("Bao cao", class_name="text-xs"), spacing="1"),
+                            rx.hstack(rx.icon("triangle-alert", size=14), rx.text("Báo cáo", class_name="text-xs"), spacing="1"),
                             on_click=AppState.toggle_feed_report_box(post.get("id")),
                             class_name="text-slate-600 hover:text-[#ff4500] hover:bg-orange-50 px-2.5 py-1.5 rounded-lg transition",
                         ),
@@ -340,7 +340,7 @@ def _post_card(post: dict) -> rx.Component:
                         rx.hstack(
                             rx.icon("bookmark", size=14),
                             rx.text(
-                                rx.cond(post.get("is_saved"), "Da luu", "Luu"),
+                                rx.cond(post.get("is_saved"), "Đã lưu", "Lưu"),
                                 class_name="text-xs",
                             ),
                             spacing="1",
@@ -355,7 +355,7 @@ def _post_card(post: dict) -> rx.Component:
                     rx.cond(
                         AppState.is_admin,
                         rx.el.button(
-                            rx.hstack(rx.icon("trash-2", size=14), rx.text("Go bai", class_name="text-xs"), spacing="1"),
+                            rx.hstack(rx.icon("trash-2", size=14), rx.text("Gỡ bài", class_name="text-xs"), spacing="1"),
                             on_click=AppState.admin_remove_post(post.get("id")),
                             class_name="text-red-600 hover:text-red-700 hover:bg-red-50 px-2.5 py-1.5 rounded-lg transition",
                         ),
@@ -369,19 +369,19 @@ def _post_card(post: dict) -> rx.Component:
                     AppState.feed_report_post_id == post.get("id"),
                     rx.el.div(
                         rx.text_area(
-                            placeholder="Nhap ly do bao cao...",
+                            placeholder="Nhập lý do báo cáo...",
                             value=AppState.feed_report_reason,
                             on_change=AppState.set_feed_report_reason,
                             class_name="w-full bg-white border border-slate-200 rounded-xl p-3 text-sm min-h-[88px]",
                         ),
                         rx.hstack(
                             rx.button(
-                                "Huy",
+                                "Hủy",
                                 on_click=AppState.toggle_feed_report_box(post.get("id")),
                                 class_name="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-xl text-sm",
                             ),
                             rx.button(
-                                "Gui bao cao",
+                                "Gửi báo cáo",
                                 on_click=AppState.submit_feed_report(post.get("id")),
                                 class_name="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-xl text-sm",
                             ),
@@ -419,7 +419,7 @@ def _feed_grid() -> rx.Component:
                 AppState.feed_filtered_posts.length() == 0,
                 rx.el.div(
                     rx.icon("inbox", size=18),
-                    rx.text("Chua co bai viet nao.", class_name="text-sm"),
+                    rx.text("Chưa có bài viết nào.", class_name="text-sm"),
                     class_name="text-center py-12 text-gray-400 flex flex-col items-center gap-2",
                 ),
                 rx.el.div(

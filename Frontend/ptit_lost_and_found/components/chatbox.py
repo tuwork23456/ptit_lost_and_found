@@ -72,7 +72,7 @@ def chatbox() -> rx.Component:
         rx.el.div(
             rx.el.div(
                 rx.hstack(
-                    rx.el.span("Tin nhan", class_name="font-semibold text-sm text-slate-800"),
+                    rx.el.span("Tin nhắn", class_name="font-semibold text-sm text-slate-800"),
                     rx.spacer(),
                     rx.el.button(
                         rx.icon("refresh-cw", size=14),
@@ -92,7 +92,7 @@ def chatbox() -> rx.Component:
             rx.el.div(
                 rx.el.div(
                     rx.text(
-                        "Hoi thoai",
+                        "Hội thoại",
                         class_name="text-[11px] uppercase tracking-wide font-semibold text-slate-400 px-3 pt-3 pb-2",
                     ),
                     rx.cond(
@@ -107,7 +107,7 @@ def chatbox() -> rx.Component:
                             AppState.conversations.length() == 0,
                             rx.center(
                                 rx.text(
-                                    "Chua co tin nhan nao.",
+                                    "Chưa có tin nhắn nào.",
                                     class_name="text-sm text-slate-400",
                                 ),
                                 class_name="h-full",
@@ -123,12 +123,12 @@ def chatbox() -> rx.Component:
                 ),
                 rx.el.div(
                     rx.hstack(
-                        rx.text("Dang chat voi:", class_name="text-xs text-slate-500"),
+                        rx.text("Đang chat với:", class_name="text-xs text-slate-500"),
                         rx.text(
                             rx.cond(
                                 AppState.current_chat_receiver_id > 0,
                                 AppState.current_chat_receiver_name,
-                                "Chua chon hoi thoai",
+                                "Chưa chọn hội thoại",
                             ),
                             class_name="text-sm font-semibold text-slate-800",
                         ),
@@ -159,7 +159,7 @@ def chatbox() -> rx.Component:
                                 AppState.chat_messages.length() == 0,
                                 rx.center(
                                     rx.text(
-                                        "Chua co tin nhan.",
+                                        "Chưa có tin nhắn.",
                                         class_name="text-xs text-slate-400",
                                     ),
                                     class_name="h-full",
@@ -172,7 +172,7 @@ def chatbox() -> rx.Component:
                             ),
                             rx.center(
                                 rx.text(
-                                    "Chon mot hoi thoai de bat dau.",
+                                    "Chọn một hội thoại để bắt đầu.",
                                     class_name="text-xs text-slate-400",
                                 ),
                                 class_name="h-full",
@@ -183,13 +183,13 @@ def chatbox() -> rx.Component:
                     rx.form(
                         rx.hstack(
                             rx.input(
-                                placeholder="Nhap tin nhan...",
+                                placeholder="Nhập tin nhắn...",
                                 value=AppState.chat_input,
                                 on_change=AppState.set_chat_input,
                                 class_name="flex-1 h-10 bg-white border border-slate-200 rounded-full px-4 py-0 text-sm leading-6 outline-none focus:border-orange-300",
                             ),
                             rx.button(
-                                "Gui",
+                                "Gửi",
                                 type="submit",
                                 disabled=(AppState.chat_input == "")
                                 | (AppState.current_chat_receiver_id == 0),

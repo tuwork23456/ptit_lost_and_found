@@ -8,10 +8,10 @@ def navbar() -> rx.Component:
         AppState.show_notifications,
         rx.el.div(
             rx.hstack(
-                rx.el.h3("Thong bao", class_name="font-bold text-slate-800"),
+                rx.el.h3("Thông báo", class_name="font-bold text-slate-800"),
                 rx.spacer(),
                 rx.el.button(
-                    "Danh dau da doc",
+                    "Đánh dấu đã đọc",
                     on_click=AppState.mark_all_notifications_read,
                     class_name="text-[11px] text-red-500 hover:underline",
                 ),
@@ -21,7 +21,7 @@ def navbar() -> rx.Component:
             ),
             rx.cond(
                 AppState.notifications.length() == 0,
-                rx.el.div("Chua co thong bao nao.", class_name="px-4 py-8 text-center text-sm text-slate-500"),
+                rx.el.div("Chưa có thông báo nào.", class_name="px-4 py-8 text-center text-sm text-slate-500"),
                 rx.el.div(
                     rx.foreach(
                         AppState.notifications,
@@ -50,13 +50,13 @@ def navbar() -> rx.Component:
         AppState.show_account_menu,
         rx.el.div(
             rx.link(
-                "Trang ca nhan",
+                "Trang cá nhân",
                 href="/profile",
                 on_click=AppState.close_account_menu,
                 class_name="block w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50",
             ),
             rx.el.button(
-                "Dang xuat",
+                "Đăng xuất",
                 on_click=AppState.logout,
                 class_name="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50",
             ),

@@ -6,7 +6,7 @@ from ptit_lost_and_found.state import AppState
 def _search_card(post: dict) -> rx.Component:
     post_id = post["id"].to_string()
     has_image = (post.get("image") != None) & (post.get("image") != "")
-    post_type_label = rx.cond(post["type"] == "LOST", "Mat do", "Nhat duoc")
+    post_type_label = rx.cond(post["type"] == "LOST", "Mất đồ", "Nhặt được")
     return rx.link(
         rx.el.div(
             rx.vstack(
@@ -34,7 +34,7 @@ def _search_card(post: dict) -> rx.Component:
             ),
             rx.el.div(
                 rx.hstack(
-                    rx.text("Nguoi dang:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
+                    rx.text("Người đăng:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
                     rx.text(post.get("username"), class_name="text-sm font-bold text-[#ff4500] truncate"),
                     spacing="2",
                     align="center",
@@ -42,7 +42,7 @@ def _search_card(post: dict) -> rx.Component:
                     class_name="mb-1.5",
                 ),
                 rx.hstack(
-                    rx.text("Tieu de:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
+                    rx.text("Tiêu đề:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
                     rx.text(post["title"], class_name="text-sm font-bold text-slate-900 truncate"),
                     spacing="2",
                     align="center",
@@ -50,7 +50,7 @@ def _search_card(post: dict) -> rx.Component:
                     class_name="mb-1.5",
                 ),
                 rx.hstack(
-                    rx.text("Mo ta:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
+                    rx.text("Mô tả:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
                     rx.text(post["description"], class_name="text-sm text-slate-700 truncate"),
                     spacing="2",
                     align="center",
@@ -105,17 +105,17 @@ def search_page() -> rx.Component:
                 rx.el.div(
                     rx.vstack(
                         rx.vstack(
-                            rx.text("Tim nhanh", class_name="text-xs font-semibold uppercase tracking-wide text-[#ff4500]"),
+                            rx.text("Tìm nhanh", class_name="text-xs font-semibold uppercase tracking-wide text-[#ff4500]"),
                             rx.form(
                                 rx.hstack(
                                     rx.input(
                                         value=AppState.search_query,
                                         on_change=AppState.set_search_query,
-                                        placeholder="Nhap tu khoa (vi, the sv, dien thoai, toa A2...)",
+                                        placeholder="Nhập từ khóa (ví dụ: thẻ SV, điện thoại, tòa A2...)",
                                         class_name="min-w-[280px] flex-1",
                                     ),
                                     rx.button(
-                                        "Tim nhanh",
+                                        "Tìm nhanh",
                                         type="submit",
                                         class_name="bg-[#ff4500] hover:bg-[#e03d00] text-white font-semibold px-4",
                                     ),
@@ -131,10 +131,10 @@ def search_page() -> rx.Component:
                             width="100%",
                         ),
                         rx.vstack(
-                            rx.text("Tim loc", class_name="text-xs font-semibold uppercase tracking-wide text-[#ff4500]"),
+                            rx.text("Tìm lọc", class_name="text-xs font-semibold uppercase tracking-wide text-[#ff4500]"),
                             rx.hstack(
                                 rx.select(
-                                    ["Tat ca loai tin", "Mat do", "Nhat duoc"],
+                                    ["Tất cả loại tin", "Mất đồ", "Nhặt được"],
                                     value=AppState.selected_type,
                                     on_change=AppState.set_selected_type_and_reset,
                                     class_name="min-w-[180px]",
@@ -174,7 +174,7 @@ def search_page() -> rx.Component:
                         ),
                         rx.cond(
                             AppState.paginated_posts.length() == 0,
-                            rx.el.div("Khong co ket qua phu hop.", class_name="text-center py-10 text-slate-400"),
+                            rx.el.div("Không có kết quả phù hợp.", class_name="text-center py-10 text-slate-400"),
                             rx.vstack(rx.foreach(AppState.paginated_posts, _search_card), width="100%", spacing="4", align="stretch"),
                         ),
                     ),

@@ -19,23 +19,23 @@ def left_sidebar() -> rx.Component:
 
     return rx.el.aside(
         rx.el.div(
-            rx.text("Kham pha", class_name="text-[11px] font-semibold uppercase tracking-wide text-slate-400 px-3 pb-1"),
-            _item("house", "Trang chu", "/"),
-            _item("search", "Tim kiem", "/search"),
-            _item("square-pen", "Dang tin", "/post"),
+            rx.text("Khám phá", class_name="text-[11px] font-semibold uppercase tracking-wide text-slate-400 px-3 pb-1"),
+            _item("house", "Trang chủ", "/"),
+            _item("search", "Tìm kiếm", "/search"),
+            _item("square-pen", "Đăng tin", "/post"),
             rx.el.div(class_name="h-px bg-slate-100 my-2"),
-            rx.text("Ca nhan", class_name="text-[11px] font-semibold uppercase tracking-wide text-slate-400 px-3 pb-1"),
-            _item("folder-kanban", "Quan ly bai dang", "/manage-post"),
-            _item("bookmark", "Bai da luu", "/saved-posts"),
+            rx.text("Cá nhân", class_name="text-[11px] font-semibold uppercase tracking-wide text-slate-400 px-3 pb-1"),
+            _item("folder-kanban", "Quản lý bài đăng", "/manage-post"),
+            _item("bookmark", "Bài đã lưu", "/saved-posts"),
             rx.cond(
                 AppState.is_admin,
                 rx.fragment(
                     rx.el.div(class_name="h-px bg-slate-100 my-2"),
                     rx.text(
-                        "Quan tri",
+                        "Quản trị",
                         class_name="text-[11px] font-semibold uppercase tracking-wide text-slate-400 px-3 pb-1",
                     ),
-                    _item("shield-check", "Duyet bai", "/admin"),
+                    _item("shield-check", "Duyệt bài", "/admin"),
                 ),
             ),
             class_name="bg-white rounded-xl border border-slate-200 p-3 shadow-sm",
@@ -48,22 +48,28 @@ def right_panel() -> rx.Component:
     return rx.el.aside(
         rx.vstack(
             rx.el.div(
-                rx.text("Cam nang su dung", class_name="text-sm font-bold uppercase tracking-wide text-[#ff4500] px-1 pb-2"),
+                rx.text("Cẩm nang sử dụng", class_name="text-sm font-bold uppercase tracking-wide text-[#ff4500] px-1 pb-2"),
                 rx.el.ul(
-                    rx.el.li("Trang chu: Cap nhat tin moi nhat moi giay."),
-                    rx.el.li("Tim kiem: Loc thong minh theo Toa nha va Loai do."),
-                    rx.el.li("Dang tin: Mo ta ky de tang 80% co hoi tim thay."),
-                    rx.el.li("Nhan tin: Ket noi truc tiep, trao doi an toan."),
+                    rx.el.li("Trang chủ: Cập nhật tin mới nhất mỗi giây."),
+                    rx.el.li("Tìm kiếm: Lọc thông minh theo tòa nhà và loại đồ."),
+                    rx.el.li("Đăng tin: Mô tả kỹ để tăng 80% cơ hội tìm thấy."),
+                    rx.el.li("Nhắn tin: Kết nối trực tiếp, trao đổi an toàn."),
                     class_name="text-sm text-slate-700 list-disc pl-5 space-y-2 leading-6",
                 ),
                 class_name="bg-white rounded-xl border border-slate-200 p-3 shadow-sm",
             ),
             rx.el.div(
-                rx.text("Bi kip tranh lua dao", class_name="text-sm font-bold uppercase tracking-wide text-[#ff4500] px-1 pb-2"),
+                rx.text("Bí kíp tránh lừa đảo", class_name="text-sm font-bold uppercase tracking-wide text-[#ff4500] px-1 pb-2"),
                 rx.el.ul(
-                    rx.el.li("Xac minh chinh chu: Yeu cau nguoi nhat duoc mo ta dac diem bi mat cua do vat (vi du: vet xuoc, hinh nen dien thoai)."),
-                    rx.el.li("Giao dich truc tiep: Uu tien hen gap tai sanh cac toa A2, A3 hoac phong Bao ve. Tuyet doi khong chuyen khoan truoc (phi ship, tien hau ta)."),
-                    rx.el.li("Bao mat thong tin: Khong nen chup ro toan bo so CCCD hoac mat truoc the ATM len bai dang cong khai."),
+                    rx.el.li(
+                        "Xác minh chính chủ: Yêu cầu người nhặt được mô tả đặc điểm bí mật của đồ vật (ví dụ: vết xước, hình nền điện thoại)."
+                    ),
+                    rx.el.li(
+                        "Giao dịch trực tiếp: Ưu tiên hẹn gặp tại sảnh các tòa A2, A3 hoặc phòng Bảo vệ. Tuyệt đối không chuyển khoản trước (phí ship, tiền hậu tạ)."
+                    ),
+                    rx.el.li(
+                        "Bảo mật thông tin: Không nên chụp rõ toàn bộ số CCCD hoặc mặt trước thẻ ATM lên bài đăng công khai."
+                    ),
                     class_name="text-sm text-slate-700 list-disc pl-5 space-y-2 leading-6",
                 ),
                 class_name="bg-white rounded-xl border border-slate-200 p-3 shadow-sm",
@@ -73,4 +79,3 @@ def right_panel() -> rx.Component:
         ),
         class_name="hidden lg:block lg:w-[220px] lg:flex-shrink-0 lg:self-start",
     )
-

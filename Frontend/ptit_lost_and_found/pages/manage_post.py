@@ -30,7 +30,7 @@ def _moderation_badge(post: dict) -> rx.Component:
 
 def _resolved_badge(post: dict) -> rx.Component:
     return rx.el.span(
-        rx.cond(post.get("is_resolved") == True, "Da giai quyet", "Dang xu ly"),
+        rx.cond(post.get("is_resolved") == True, "Đã giải quyết", "Đang xử lý"),
         class_name=rx.cond(
             post.get("is_resolved") == True,
             "text-[10px] font-semibold px-2 py-1 rounded-full text-emerald-700 bg-emerald-50 border border-emerald-200",
@@ -41,7 +41,7 @@ def _resolved_badge(post: dict) -> rx.Component:
 
 def _post_item(post: dict) -> rx.Component:
     post_id = post.get("id")
-    post_type = rx.cond(post.get("type") == "LOST", "Mat do", "Nhat duoc")
+    post_type = rx.cond(post.get("type") == "LOST", "Mất đồ", "Nhặt được")
     has_image = (post.get("image") != None) & (post.get("image") != "")
     return rx.el.div(
         rx.vstack(
@@ -80,7 +80,7 @@ def _post_item(post: dict) -> rx.Component:
         ),
         rx.el.div(
             rx.hstack(
-                rx.text("Nguoi dang:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
+                rx.text("Người đăng:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
                 rx.text(post.get("username"), class_name="text-sm font-bold text-[#ff4500] truncate"),
                 spacing="2",
                 align="center",
@@ -88,9 +88,9 @@ def _post_item(post: dict) -> rx.Component:
                 class_name="mb-1.5",
             ),
             rx.hstack(
-                rx.text("Tieu de:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
+                rx.text("Tiêu đề:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
                 rx.text(
-                    rx.cond(post.get("title") != None, post.get("title"), "Khong co tieu de"),
+                    rx.cond(post.get("title") != None, post.get("title"), "Không có tiêu đề"),
                     class_name="text-sm font-bold text-slate-900 truncate",
                 ),
                 spacing="2",
@@ -99,7 +99,7 @@ def _post_item(post: dict) -> rx.Component:
                 class_name="mb-1.5",
             ),
             rx.hstack(
-                rx.text("Mo ta:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
+                rx.text("Mô tả:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
                 rx.text(
                     rx.cond(post.get("description") != None, post.get("description"), ""),
                     class_name="text-sm text-slate-700 truncate",
@@ -148,7 +148,7 @@ def _post_item(post: dict) -> rx.Component:
                     class_name="text-center text-xs font-semibold text-blue-600 bg-blue-50 px-3 py-2 rounded-lg hover:bg-blue-100 transition-all",
                 ),
                 rx.button(
-                    "Xoa",
+                    "Xóa",
                     on_click=AppState.delete_my_post(post_id),
                     class_name="text-xs font-semibold text-red-600 bg-red-50 px-3 py-2 rounded-lg hover:bg-red-100 transition-all",
                 ),
@@ -170,13 +170,13 @@ def manage_post_page() -> rx.Component:
                     rx.el.div(
                         rx.hstack(
                             rx.vstack(
-                                rx.heading("Quan ly bai dang", size="6", class_name="text-slate-800"),
-                                rx.text(f"Tong {AppState.my_posts.length()} bai da dang", class_name="text-sm text-slate-500"),
+                                rx.heading("Quản lý bài đăng", size="6", class_name="text-slate-800"),
+                                rx.text(f"Tổng {AppState.my_posts.length()} bài đã đăng", class_name="text-sm text-slate-500"),
                                 spacing="1",
                                 align="start",
                             ),
                             rx.link(
-                                "+ Dang tin moi",
+                                "+ Đăng tin mới",
                                 href="/post",
                                 class_name="bg-[#ff4500] hover:bg-[#e03d00] text-white font-semibold px-4 py-2.5 rounded-xl text-sm",
                             ),
@@ -200,9 +200,9 @@ def manage_post_page() -> rx.Component:
                                 rx.center(
                                     rx.vstack(
                                         rx.icon("inbox", size=18, class_name="text-slate-400"),
-                                        rx.text("Ban chua dang tin nao.", class_name="text-sm font-medium text-slate-500"),
+                                        rx.text("Bạn chưa đăng tin nào.", class_name="text-sm font-medium text-slate-500"),
                                         rx.link(
-                                            "Dang tin ngay",
+                                            "Đăng tin ngay",
                                             href="/post",
                                             class_name="bg-[#ff4500] text-white text-sm font-semibold px-5 py-2.5 rounded-xl",
                                         ),
@@ -224,8 +224,8 @@ def manage_post_page() -> rx.Component:
         ),
         rx.center(
             rx.vstack(
-                rx.text("Vui long dang nhap de quan ly bai dang.", class_name="text-gray-500"),
-                rx.link("Dang nhap ngay", href="/login", class_name="text-red-500 hover:underline"),
+                rx.text("Vui lòng đăng nhập để quản lý bài đăng.", class_name="text-gray-500"),
+                rx.link("Đăng nhập ngay", href="/login", class_name="text-red-500 hover:underline"),
                 spacing="2",
             ),
             class_name="min-h-[60vh]",

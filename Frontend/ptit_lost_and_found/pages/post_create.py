@@ -4,27 +4,27 @@ from ptit_lost_and_found.state import AppState
 
 
 CATEGORIES = [
-    "The sinh vien",
-    "Can cuoc cong dan",
-    "Bang lai xe",
-    "The ATM/Ngan hang",
-    "Vi/Bop",
-    "Dien thoai/Laptop",
-    "Chia khoa",
-    "Balo/Tui xach",
-    "Giay to khac",
-    "Khac",
+    "Thẻ sinh viên",
+    "Căn cước công dân",
+    "Bằng lái xe",
+    "Thẻ ATM/Ngân hàng",
+    "Ví/Bóp",
+    "Điện thoại/Laptop",
+    "Chìa khóa",
+    "Balo/Túi xách",
+    "Giấy tờ khác",
+    "Khác",
 ]
 
 LOCATIONS = [
-    "Toa A1",
-    "Toa A2",
-    "Toa A3",
-    "Sanh A1",
-    "Sanh A2",
-    "Can tin",
-    "Bai gui xe",
-    "Khac",
+    "Tòa A1",
+    "Tòa A2",
+    "Tòa A3",
+    "Sảnh A1",
+    "Sảnh A2",
+    "Căn tin",
+    "Bãi gửi xe",
+    "Khác",
 ]
 
 
@@ -33,9 +33,9 @@ def post_create_page() -> rx.Component:
         rx.el.div(
             rx.el.div(
                 rx.el.div(
-                    rx.heading("Tao bai dang moi", size="7", class_name="text-slate-800 tracking-tight"),
+                    rx.heading("Tạo bài đăng mới", size="7", class_name="text-slate-800 tracking-tight"),
                     rx.text(
-                        "Dien thong tin can thiet de dang bai mat/nhat do nhanh gon.",
+                        "Điền thông tin cần thiết để đăng bài mất/nhặt đồ nhanh gọn.",
                         class_name="text-sm text-slate-500 mt-1",
                     ),
                     class_name="sticky top-0 z-10 bg-white px-5 md:px-6 pt-5 md:pt-6 pb-4 border-b border-slate-200",
@@ -46,10 +46,10 @@ def post_create_page() -> rx.Component:
                         rx.vstack(
                             rx.vstack(
                                 rx.el.div(
-                                    rx.el.label("Loai tin", class_name="text-sm font-semibold text-slate-700 block mb-2"),
+                                    rx.el.label("Loại tin", class_name="text-sm font-semibold text-slate-700 block mb-2"),
                                     rx.hstack(
                                         rx.button(
-                                            "Mat do",
+                                            "Mất đồ",
                                             type="button",
                                             on_click=AppState.set_create_post_type("LOST"),
                                             class_name=rx.cond(
@@ -59,7 +59,7 @@ def post_create_page() -> rx.Component:
                                             ),
                                         ),
                                         rx.button(
-                                            "Nhat duoc",
+                                            "Nhặt được",
                                             type="button",
                                             on_click=AppState.set_create_post_type("FOUND"),
                                             class_name=rx.cond(
@@ -73,19 +73,19 @@ def post_create_page() -> rx.Component:
                                     ),
                                 ),
                                 rx.el.div(
-                                    rx.el.label("Tieu de", class_name="text-sm font-semibold text-slate-700 block mb-2"),
+                                    rx.el.label("Tiêu đề", class_name="text-sm font-semibold text-slate-700 block mb-2"),
                                     rx.input(
-                                        placeholder="Vi du: Mat vi mau den tai Toa A1",
+                                        placeholder="Ví dụ: Mất ví màu đen tại Tòa A1",
                                         value=AppState.create_post_title,
                                         on_change=AppState.set_create_post_title,
                                         class_name="w-full h-12 bg-slate-50 border border-slate-200 rounded-xl px-4 py-0 text-[17px] leading-6 text-slate-800 outline-none",
                                     ),
-                                    rx.text("Tieu de se duoc luu truc tiep vao backend va DB.", class_name="text-xs text-slate-500 mt-1"),
+                                    rx.text("Tiêu đề sẽ được lưu trực tiếp vào backend và DB.", class_name="text-xs text-slate-500 mt-1"),
                                     class_name="w-full max-w-[760px]",
                                 ),
                                 rx.vstack(
-                                    rx.el.label("Anh minh hoa", class_name="text-sm font-semibold text-slate-700 block"),
-                                    rx.text("Anh toi da 5MB (png/jpg/jpeg/webp).", class_name="text-xs text-slate-500"),
+                                    rx.el.label("Ảnh minh họa", class_name="text-sm font-semibold text-slate-700 block"),
+                                    rx.text("Ảnh tối đa 5MB (png/jpg/jpeg/webp).", class_name="text-xs text-slate-500"),
                                     rx.upload(
                                         rx.el.div(
                                             rx.cond(
@@ -97,12 +97,12 @@ def post_create_page() -> rx.Component:
                                                 rx.vstack(
                                                     rx.hstack(
                                                         rx.icon("upload", size=16),
-                                                        rx.text("Tai anh len"),
+                                                        rx.text("Tải ảnh lên"),
                                                         spacing="2",
                                                         align="center",
                                                     ),
                                                     rx.text(
-                                                        "Nhan de chon anh hoac keo tha vao day",
+                                                        "Nhấn để chọn ảnh hoặc kéo thả vào đây",
                                                         class_name="text-xs text-slate-500",
                                                     ),
                                                     spacing="2",
@@ -120,14 +120,14 @@ def post_create_page() -> rx.Component:
                                     width="100%",
                                 ),
                                 rx.vstack(
-                                    rx.el.label("Mo ta", class_name="text-sm font-semibold text-slate-700 block mb-1"),
+                                    rx.el.label("Mô tả", class_name="text-sm font-semibold text-slate-700 block mb-1"),
                                     rx.text_area(
                                         placeholder="Mô tả chi tiết món đồ...",
                                         value=AppState.create_post_description,
                                         on_change=AppState.set_create_post_description,
                                         class_name="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm min-h-[110px] outline-none",
                                     ),
-                                    rx.el.label("Danh muc", class_name="text-sm font-semibold text-slate-700 block mb-1"),
+                                    rx.el.label("Danh mục", class_name="text-sm font-semibold text-slate-700 block mb-1"),
                                     rx.select(
                                         CATEGORIES,
                                         value=AppState.create_post_category,
@@ -137,7 +137,7 @@ def post_create_page() -> rx.Component:
                                         class_name="h-11",
                                     ),
                                     rx.cond(
-                                        AppState.create_post_category == "Khac",
+                                        AppState.create_post_category == "Khác",
                                         rx.input(
                                             placeholder="Nhập tên đồ vật...",
                                             value=AppState.create_post_custom_category,
@@ -145,7 +145,7 @@ def post_create_page() -> rx.Component:
                                             class_name="w-full h-12 bg-slate-50 border border-slate-200 rounded-xl px-4 py-0 text-[17px] leading-6 text-slate-800 outline-none",
                                         ),
                                     ),
-                                    rx.el.label("Khu vuc", class_name="text-sm font-semibold text-slate-700 block mb-1"),
+                                    rx.el.label("Khu vực", class_name="text-sm font-semibold text-slate-700 block mb-1"),
                                     rx.select(
                                         LOCATIONS,
                                         value=AppState.create_post_location,
@@ -155,7 +155,7 @@ def post_create_page() -> rx.Component:
                                         class_name="h-11",
                                     ),
                                     rx.cond(
-                                        AppState.create_post_location == "Khac",
+                                        AppState.create_post_location == "Khác",
                                         rx.input(
                                             placeholder="Nhập khu vực cụ thể...",
                                             value=AppState.create_post_custom_location,
@@ -163,14 +163,14 @@ def post_create_page() -> rx.Component:
                                             class_name="w-full h-12 bg-slate-50 border border-slate-200 rounded-xl px-4 py-0 text-[17px] leading-6 text-slate-800 outline-none",
                                         ),
                                     ),
-                                    rx.el.label("Thong tin lien he", class_name="text-sm font-semibold text-slate-700 block mb-1"),
+                                    rx.el.label("Thông tin liên hệ", class_name="text-sm font-semibold text-slate-700 block mb-1"),
                                     rx.text_area(
-                                        placeholder="Thong tin lien he (SDT/Facebook/Zalo...)",
+                                        placeholder="Thông tin liên hệ (SĐT/Facebook/Zalo...)",
                                         value=AppState.create_post_contact,
                                         on_change=AppState.set_create_post_contact,
                                         class_name="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm min-h-[96px] outline-none",
                                     ),
-                                    rx.text("Thong tin lien he de nguoi dung de nhan/tra.", class_name="text-xs text-slate-500"),
+                                    rx.text("Thông tin liên hệ để người dùng dễ nhắn/trả.", class_name="text-xs text-slate-500"),
                                     spacing="3",
                                     width="100%",
                                 ),
@@ -190,7 +190,7 @@ def post_create_page() -> rx.Component:
                                 ),
                                 rx.hstack(
                                     rx.button(
-                                        "Lam moi",
+                                        "Làm mới",
                                         type="button",
                                         on_click=AppState.reset_create_post_form,
                                         class_name="bg-white hover:bg-slate-50 text-slate-700 font-semibold py-3 px-5 rounded-xl border border-slate-200 transition-all",
@@ -208,7 +208,7 @@ def post_create_page() -> rx.Component:
                                     width="100%",
                                     align="center",
                                 ),
-                                rx.text("Tin co the duoc kiem duyet truoc khi hien thi cong khai.", class_name="text-xs text-slate-500 text-center"),
+                                rx.text("Tin có thể được kiểm duyệt trước khi hiển thị công khai.", class_name="text-xs text-slate-500 text-center"),
                                 spacing="5",
                                 width="100%",
                             ),
@@ -230,5 +230,5 @@ def post_create_page() -> rx.Component:
             class_name="max-w-7xl px-4 md:px-8 lg:px-10 mx-auto py-8",
         ),
         class_name="w-full bg-[#f8fafc] min-h-screen",
+        on_mount=AppState.clear_messages,
     )
-

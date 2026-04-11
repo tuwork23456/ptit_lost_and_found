@@ -19,7 +19,7 @@ def _comment_item(comment: dict) -> rx.Component:
                         rx.cond(
                             comment.get("is_reply") & (comment.get("reply_to_user") != ""),
                             rx.hstack(
-                                rx.el.span("tra loi", class_name="text-[11px] text-gray-400"),
+                                rx.el.span("trả lời", class_name="text-[11px] text-gray-400"),
                                 rx.el.span(comment.get("reply_to_user"), class_name="text-[11px] text-gray-400"),
                                 spacing="1",
                             ),
@@ -30,7 +30,7 @@ def _comment_item(comment: dict) -> rx.Component:
                     ),
                     rx.el.p(comment.get("content"), class_name="text-sm text-gray-700 whitespace-pre-line leading-6"),
                     rx.el.button(
-                        "Tra loi",
+                        "Trả lời",
                         on_click=AppState.set_post_reply_target(comment_id, comment.get("username")),
                         class_name="text-[11px] font-semibold text-[#ff4500] hover:underline mt-1",
                     ),
@@ -46,19 +46,19 @@ def _comment_item(comment: dict) -> rx.Component:
                         rx.input(
                             value=AppState.post_reply_text,
                             on_change=AppState.set_post_reply_text,
-                            placeholder="Nhap tra loi...",
+                            placeholder="Nhập trả lời...",
                             class_name="w-full bg-white border border-slate-200 rounded-full px-4 py-2 text-sm",
                         ),
                         rx.hstack(
                             rx.spacer(),
                             rx.el.button(
-                                "Huy",
+                                "Hủy",
                                 type="button",
                                 on_click=AppState.cancel_post_reply,
                                 class_name="px-3 py-1.5 text-xs rounded-full border border-slate-200 hover:bg-slate-50",
                             ),
                             rx.el.button(
-                                "Gui",
+                                "Gửi",
                                 type="submit",
                                 class_name="px-4 py-1.5 text-xs rounded-full bg-[#ff4500] text-white font-semibold hover:bg-[#e03d00]",
                             ),
@@ -81,13 +81,13 @@ def _comment_item(comment: dict) -> rx.Component:
 def post_detail_page() -> rx.Component:
     post = AppState.current_post
     post_id = post.get("id").to_string()
-    post_type = rx.cond(post.get("type") == "FOUND", "Nhat duoc", "Mat do")
-    status_text = rx.cond(post.get("is_resolved") == True, "Da giai quyet", "Dang xu ly")
+    post_type = rx.cond(post.get("type") == "FOUND", "Nhặt được", "Mất đồ")
+    status_text = rx.cond(post.get("is_resolved") == True, "Đã giải quyết", "Đang xử lý")
 
     detail_view = rx.vstack(
         rx.el.div(
             rx.hstack(
-                rx.text("Nguoi dang:", class_name="text-sm font-semibold text-slate-500 min-w-[90px]"),
+                rx.text("Người đăng:", class_name="text-sm font-semibold text-slate-500 min-w-[90px]"),
                 rx.link(
                     rx.text(post.get("username"), class_name="text-sm font-bold text-[#ff4500]"),
                     href="/user/" + post.get("user_id").to_string(),
@@ -97,9 +97,9 @@ def post_detail_page() -> rx.Component:
                 width="100%",
             ),
             rx.hstack(
-                rx.text("Tieu de:", class_name="text-sm font-semibold text-slate-500 min-w-[90px]"),
+                rx.text("Tiêu đề:", class_name="text-sm font-semibold text-slate-500 min-w-[90px]"),
                 rx.heading(
-                    rx.cond(post.get("title") != None, post.get("title"), "Khong co tieu de"),
+                    rx.cond(post.get("title") != None, post.get("title"), "Không có tiêu đề"),
                     size="5",
                     class_name="text-slate-900 tracking-tight leading-tight",
                 ),
@@ -109,7 +109,7 @@ def post_detail_page() -> rx.Component:
                 width="100%",
             ),
             rx.hstack(
-                rx.text("Mo ta:", class_name="text-sm font-semibold text-slate-500 min-w-[90px]"),
+                rx.text("Mô tả:", class_name="text-sm font-semibold text-slate-500 min-w-[90px]"),
                 rx.el.p(
                     post.get("description"),
                     class_name="text-sm leading-6 text-slate-700 whitespace-pre-line",
@@ -182,7 +182,7 @@ def post_detail_page() -> rx.Component:
         rx.el.div(
             rx.hstack(
                 rx.button(
-                    "Lien he",
+                    "Liên hệ",
                     on_click=AppState.open_chat_with_user_from_post(
                         post.get("user_id"),
                         post.get("username"),
@@ -192,12 +192,12 @@ def post_detail_page() -> rx.Component:
                     class_name="inline-flex items-center justify-center h-10 bg-[#ff4500] hover:bg-[#e03d00] text-white font-semibold px-4 rounded-xl text-sm shadow-sm",
                 ),
                 rx.link(
-                    "Chi tiet",
+                    "Chi tiết",
                     href="/post/" + post_id,
                     class_name="inline-flex items-center justify-center h-10 bg-white hover:bg-slate-50 text-slate-700 font-medium px-4 rounded-xl text-sm border border-slate-200",
                 ),
                 rx.button(
-                    rx.cond(AppState.is_current_post_saved, "Da luu bai viet", "Luu bai viet"),
+                    rx.cond(AppState.is_current_post_saved, "Đã lưu bài viết", "Lưu bài viết"),
                     on_click=AppState.toggle_saved_post(post.get("id")),
                     class_name=rx.cond(
                         AppState.is_current_post_saved,
@@ -208,12 +208,12 @@ def post_detail_page() -> rx.Component:
                 rx.cond(
                     AppState.is_admin,
                     rx.button(
-                        "Go bai",
+                        "Gỡ bài",
                         on_click=AppState.admin_remove_post(post.get("id")),
                         class_name="inline-flex items-center justify-center h-10 bg-white hover:bg-red-50 text-red-700 font-medium px-4 rounded-xl text-sm border border-red-200",
                     ),
                     rx.button(
-                        "Bao cao",
+                        "Báo cáo",
                         on_click=AppState.open_post_report_box,
                         class_name="inline-flex items-center justify-center h-10 bg-white hover:bg-amber-50 text-amber-700 font-medium px-4 rounded-xl text-sm border border-amber-200",
                     ),
@@ -221,7 +221,7 @@ def post_detail_page() -> rx.Component:
                 rx.cond(
                     AppState.is_current_post_owner & (post.get("is_resolved") != True),
                     rx.button(
-                        "Danh dau da giai quyet",
+                        "Đánh dấu đã giải quyết",
                         on_click=AppState.resolve_current_post,
                         class_name="inline-flex items-center justify-center h-10 bg-slate-800 hover:bg-slate-900 text-white font-medium px-4 rounded-xl text-sm",
                     ),
@@ -238,8 +238,8 @@ def post_detail_page() -> rx.Component:
                 rx.text_area(
                     placeholder=rx.cond(
                         AppState.post_report_mode == "report",
-                        "Nhap ly do bao cao...",
-                        "Nhap ly do yeu cau go bai...",
+                        "Nhập lý do báo cáo...",
+                        "Nhập lý do yêu cầu gỡ bài...",
                     ),
                     value=AppState.report_reason,
                     on_change=AppState.set_report_reason,
@@ -247,19 +247,19 @@ def post_detail_page() -> rx.Component:
                 ),
                 rx.hstack(
                     rx.button(
-                        "Huy",
+                        "Hủy",
                         on_click=AppState.close_post_report_box,
                         class_name="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-xl text-sm",
                     ),
                     rx.cond(
                         AppState.post_report_mode == "report",
                         rx.button(
-                            "Gui bao cao",
+                            "Gửi báo cáo",
                             on_click=AppState.report_current_post,
                             class_name="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-xl text-sm",
                         ),
                         rx.button(
-                            "Gui yeu cau go bai",
+                            "Gửi yêu cầu gỡ bài",
                             on_click=AppState.request_remove_current_post,
                             class_name="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-xl text-sm",
                         ),
@@ -286,7 +286,7 @@ def post_detail_page() -> rx.Component:
 
     comments_view = rx.el.div(
         rx.hstack(
-            rx.heading("Binh luan", size="5"),
+            rx.heading("Bình luận", size="5"),
             rx.text(f"({AppState.post_threaded_comments.length()})", class_name="text-red-500"),
             width="100%",
             align="center",
@@ -298,7 +298,7 @@ def post_detail_page() -> rx.Component:
             rx.form(
                 rx.vstack(
                     rx.text_area(
-                        placeholder="Viet binh luan cua ban...",
+                        placeholder="Viết bình luận của bạn...",
                         value=AppState.comment_text,
                         on_change=AppState.set_comment_text,
                         class_name="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm outline-none min-h-[82px]",
@@ -306,7 +306,7 @@ def post_detail_page() -> rx.Component:
                     rx.hstack(
                         rx.spacer(),
                         rx.button(
-                            "Dang",
+                            "Đăng",
                             type="submit",
                             class_name="bg-[#ff4500] hover:bg-[#e03d00] text-white px-4 py-1.5 rounded-xl font-semibold text-sm",
                         ),
@@ -319,15 +319,15 @@ def post_detail_page() -> rx.Component:
                 class_name="mb-4 rounded-2xl bg-slate-50 border border-slate-200 p-3",
             ),
             rx.el.div(
-                rx.text("Vui long dang nhap de co the binh luan.", class_name="text-gray-500 text-sm"),
-                rx.link("Dang nhap ngay", href="/login", class_name="text-red-500 hover:underline text-sm"),
+                rx.text("Vui lòng đăng nhập để có thể bình luận.", class_name="text-gray-500 text-sm"),
+                rx.link("Đăng nhập ngay", href="/login", class_name="text-red-500 hover:underline text-sm"),
                 class_name="py-4 mb-4 bg-slate-50 rounded-xl border border-slate-200 text-center space-y-2",
             ),
         ),
         rx.cond(
             AppState.post_threaded_comments.length() == 0,
             rx.el.div(
-                "Chua co binh luan nao. Hay la nguoi dau tien!",
+                "Chưa có bình luận nào. Hãy là người đầu tiên!",
                 class_name="text-center text-slate-400 py-5 text-sm",
             ),
             rx.vstack(
@@ -342,8 +342,8 @@ def post_detail_page() -> rx.Component:
 
     not_found_view = rx.center(
         rx.vstack(
-            rx.heading("Khong tim thay bai viet!", size="6"),
-            rx.link("Ve trang chu", href="/", class_name="text-red-500 hover:underline"),
+            rx.heading("Không tìm thấy bài viết!", size="6"),
+            rx.link("Về trang chủ", href="/", class_name="text-red-500 hover:underline"),
             spacing="3",
         ),
         class_name="min-h-[60vh]",

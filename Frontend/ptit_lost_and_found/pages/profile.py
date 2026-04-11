@@ -5,7 +5,7 @@ from ptit_lost_and_found.state import AppState
 
 def _profile_post_card(post: dict) -> rx.Component:
     post_id = post.get("id")
-    post_type = rx.cond(post.get("type") == "LOST", "Mat do", "Nhat duoc")
+    post_type = rx.cond(post.get("type") == "LOST", "Mất đồ", "Nhặt được")
     has_image = (post.get("image") != None) & (post.get("image") != "")
     return rx.link(
         rx.el.div(
@@ -38,7 +38,7 @@ def _profile_post_card(post: dict) -> rx.Component:
             ),
             rx.el.div(
                 rx.hstack(
-                    rx.text("Nguoi dang:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
+                    rx.text("Người đăng:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
                     rx.text(post.get("username"), class_name="text-sm font-bold text-[#ff4500] truncate"),
                     spacing="2",
                     align="center",
@@ -46,9 +46,9 @@ def _profile_post_card(post: dict) -> rx.Component:
                     class_name="mb-1.5",
                 ),
                 rx.hstack(
-                    rx.text("Tieu de:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
+                    rx.text("Tiêu đề:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
                     rx.text(
-                        rx.cond(post.get("title") != None, post.get("title"), "Khong co tieu de"),
+                        rx.cond(post.get("title") != None, post.get("title"), "Không có tiêu đề"),
                         class_name="text-sm font-bold text-slate-900 truncate",
                     ),
                     spacing="2",
@@ -57,12 +57,12 @@ def _profile_post_card(post: dict) -> rx.Component:
                     class_name="mb-1.5",
                 ),
                 rx.hstack(
-                    rx.text("Mo ta:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
+                    rx.text("Mô tả:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
                     rx.text(
                         rx.cond(
                             (post.get("description") != None) & (post.get("description") != ""),
                             post.get("description"),
-                            "Khong co mo ta",
+                            "Không có mô tả",
                         ),
                         class_name="text-sm text-slate-700 truncate",
                     ),
@@ -105,12 +105,12 @@ def _profile_post_card(post: dict) -> rx.Component:
                 ),
                 rx.hstack(
                     rx.link(
-                        rx.hstack(rx.icon("info", size=14), rx.text("Chi tiet", class_name="text-xs"), spacing="1"),
+                        rx.hstack(rx.icon("info", size=14), rx.text("Chi tiết", class_name="text-xs"), spacing="1"),
                         href="/post/" + post_id.to_string(),
                         class_name="text-slate-600 hover:text-[#ff4500] hover:bg-orange-50 px-2.5 py-1.5 rounded-lg transition",
                     ),
                     rx.el.button(
-                        rx.hstack(rx.icon("send", size=14), rx.text("Lien he", class_name="text-xs"), spacing="1"),
+                        rx.hstack(rx.icon("send", size=14), rx.text("Liên hệ", class_name="text-xs"), spacing="1"),
                         on_click=AppState.open_chat_with_user_from_post(
                             post.get("user_id"),
                             post.get("username"),
@@ -120,7 +120,7 @@ def _profile_post_card(post: dict) -> rx.Component:
                         class_name="text-slate-600 hover:text-[#ff4500] hover:bg-orange-50 px-2.5 py-1.5 rounded-lg transition",
                     ),
                     rx.el.button(
-                        rx.hstack(rx.icon("message-circle", size=14), rx.text("Binh luan", class_name="text-xs"), spacing="1"),
+                        rx.hstack(rx.icon("message-circle", size=14), rx.text("Bình luận", class_name="text-xs"), spacing="1"),
                         on_click=AppState.open_feed_comments_modal(
                             post.get("id"),
                             post.get("title"),
@@ -135,7 +135,7 @@ def _profile_post_card(post: dict) -> rx.Component:
                     rx.cond(
                         ~AppState.is_admin,
                         rx.el.button(
-                            rx.hstack(rx.icon("triangle-alert", size=14), rx.text("Bao cao", class_name="text-xs"), spacing="1"),
+                            rx.hstack(rx.icon("triangle-alert", size=14), rx.text("Báo cáo", class_name="text-xs"), spacing="1"),
                             on_click=AppState.toggle_feed_report_box(post.get("id")),
                             class_name="text-slate-600 hover:text-[#ff4500] hover:bg-orange-50 px-2.5 py-1.5 rounded-lg transition",
                         ),
@@ -171,8 +171,8 @@ def profile_page() -> rx.Component:
                     (pid == None) | (pid == 0),
                     rx.center(
                         rx.vstack(
-                            rx.text("Khong tim thay nguoi dung.", class_name="text-slate-500 text-lg font-medium"),
-                            rx.link("← Ve trang chu", href="/", class_name="text-[#ff4500] hover:underline text-sm"),
+                            rx.text("Không tìm thấy người dùng.", class_name="text-slate-500 text-lg font-medium"),
+                            rx.link("← Về trang chủ", href="/", class_name="text-[#ff4500] hover:underline text-sm"),
                             spacing="3",
                         ),
                         class_name="min-h-[60vh]",
@@ -207,7 +207,7 @@ def profile_page() -> rx.Component:
                                 rx.cond(
                                     ~is_own,
                                     rx.button(
-                                        "Lien he",
+                                        "Liên hệ",
                                         on_click=AppState.open_chat_with_user(
                                             pid,
                                             rx.cond(profile.get("username") != None, profile.get("username"), "User"),
@@ -219,7 +219,7 @@ def profile_page() -> rx.Component:
                                 align="center",
                             ),
                             rx.el.div(
-                                rx.text("Bai dang", class_name="text-xs uppercase tracking-wide text-slate-500 font-semibold"),
+                                rx.text("Bài đăng", class_name="text-xs uppercase tracking-wide text-slate-500 font-semibold"),
                                 rx.text(AppState.profile_posts_count, class_name="text-2xl font-bold text-slate-800"),
                                 class_name="mt-5 pt-4 border-t border-slate-200",
                             ),
@@ -228,7 +228,7 @@ def profile_page() -> rx.Component:
                         rx.el.div(
                             rx.hstack(
                                 rx.heading(
-                                    rx.cond(is_own, "Bai dang cua ban", "Bai dang cua "),
+                                    rx.cond(is_own, "Bài đăng của bạn", "Bài đăng của "),
                                     size="5",
                                     class_name="text-slate-800",
                                 ),
@@ -245,7 +245,7 @@ def profile_page() -> rx.Component:
                             rx.cond(
                                 AppState.profile_posts_count == 0,
                                 rx.el.div(
-                                    "Chua co bai dang nao.",
+                                    "Chưa có bài đăng nào.",
                                     class_name="text-center py-14 text-slate-400 text-sm",
                                 ),
                                 rx.grid(

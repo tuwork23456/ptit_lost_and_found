@@ -6,7 +6,7 @@ from ptit_lost_and_found.state import AppState
 def _saved_post_item(post: dict) -> rx.Component:
     post_id = post.get("id").to_string()
     has_image = (post.get("image") != None) & (post.get("image") != "")
-    post_type = rx.cond(post.get("type") == "LOST", "Mat do", "Nhat duoc")
+    post_type = rx.cond(post.get("type") == "LOST", "Mất đồ", "Nhặt được")
     return rx.el.div(
         rx.el.div(
             rx.vstack(
@@ -34,7 +34,7 @@ def _saved_post_item(post: dict) -> rx.Component:
             ),
             rx.el.div(
                 rx.hstack(
-                    rx.text("Nguoi dang:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
+                    rx.text("Người đăng:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
                     rx.text(post.get("username"), class_name="text-sm font-bold text-[#ff4500] truncate"),
                     spacing="2",
                     align="center",
@@ -42,7 +42,7 @@ def _saved_post_item(post: dict) -> rx.Component:
                     class_name="mb-1.5",
                 ),
                 rx.hstack(
-                    rx.text("Tieu de:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
+                    rx.text("Tiêu đề:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
                     rx.text(post.get("title"), class_name="text-sm font-bold text-slate-900 truncate"),
                     spacing="2",
                     align="center",
@@ -50,7 +50,7 @@ def _saved_post_item(post: dict) -> rx.Component:
                     class_name="mb-1.5",
                 ),
                 rx.hstack(
-                    rx.text("Mo ta:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
+                    rx.text("Mô tả:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
                     rx.text(post.get("description"), class_name="text-sm text-slate-700 truncate"),
                     spacing="2",
                     align="center",
@@ -91,12 +91,12 @@ def _saved_post_item(post: dict) -> rx.Component:
                 ),
                 rx.hstack(
                     rx.link(
-                        "Xem bai",
+                        "Xem bài",
                         href="/post/" + post_id,
                         class_name="inline-flex items-center justify-center h-10 min-w-[96px] text-center text-xs font-semibold text-blue-600 bg-blue-50 px-3 py-2 rounded-lg hover:bg-blue-100 transition-all",
                     ),
                     rx.button(
-                        "Lien he",
+                        "Liên hệ",
                         on_click=AppState.open_chat_with_user_from_post(
                             post.get("user_id"),
                             post.get("username"),
@@ -106,7 +106,7 @@ def _saved_post_item(post: dict) -> rx.Component:
                         class_name="inline-flex items-center justify-center h-10 min-w-[96px] text-xs font-semibold text-emerald-700 bg-emerald-50 px-3 py-2 rounded-lg hover:bg-emerald-100 transition-all",
                     ),
                     rx.button(
-                        "Bo luu",
+                        "Bỏ lưu",
                         on_click=AppState.toggle_saved_post(post.get("id")),
                         class_name="inline-flex items-center justify-center h-10 min-w-[96px] text-xs font-semibold text-red-600 bg-red-50 px-3 py-2 rounded-lg hover:bg-red-100 transition-all",
                     ),
@@ -128,9 +128,9 @@ def saved_posts_page() -> rx.Component:
             rx.el.div(
                 rx.el.div(
                     rx.hstack(
-                        rx.heading("Bai da luu", size="6", class_name="text-slate-800"),
+                        rx.heading("Bài đã lưu", size="6", class_name="text-slate-800"),
                         rx.spacer(),
-                        rx.button("Lam moi", on_click=AppState.load_saved_posts, class_name="bg-white border border-slate-200 hover:bg-slate-50 text-sm"),
+                        rx.button("Làm mới", on_click=AppState.load_saved_posts, class_name="bg-white border border-slate-200 hover:bg-slate-50 text-sm"),
                         width="100%",
                     ),
                     class_name="sticky top-0 z-10 bg-white px-6 pt-6 pb-4 border-b border-slate-200",
@@ -138,7 +138,7 @@ def saved_posts_page() -> rx.Component:
                 rx.el.div(
                     rx.cond(
                         AppState.saved_posts.length() == 0,
-                        rx.center(rx.text("Ban chua luu bai viet nao.", class_name="text-slate-400"), class_name="py-12"),
+                        rx.center(rx.text("Bạn chưa lưu bài viết nào.", class_name="text-slate-400"), class_name="py-12"),
                         rx.vstack(rx.foreach(AppState.saved_posts, _saved_post_item), spacing="4", width="100%", class_name="mt-4"),
                     ),
                     class_name="flex-1 px-6 pb-6 overflow-y-auto",

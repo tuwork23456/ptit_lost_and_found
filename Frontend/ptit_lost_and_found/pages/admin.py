@@ -4,7 +4,7 @@ from ptit_lost_and_found.state import AppState
 def _admin_post_card(post: dict) -> rx.Component:
     pid = post.get("id", 0)
     has_image = (post.get("image") != None) & (post.get("image") != "")
-    post_type = rx.cond(post.get("type") == "LOST", "Mat do", "Nhat duoc")
+    post_type = rx.cond(post.get("type") == "LOST", "Mất đồ", "Nhặt được")
     return rx.el.div(
         rx.el.div(
             rx.vstack(
@@ -32,7 +32,7 @@ def _admin_post_card(post: dict) -> rx.Component:
             ),
             rx.el.div(
                 rx.hstack(
-                    rx.text("Nguoi dang:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
+                    rx.text("Người đăng:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
                     rx.text(post.get("username"), class_name="text-sm font-bold text-[#ff4500] truncate"),
                     spacing="2",
                     align="center",
@@ -40,15 +40,15 @@ def _admin_post_card(post: dict) -> rx.Component:
                     class_name="mb-1.5",
                 ),
                 rx.hstack(
-                    rx.text("Tieu de:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
-                    rx.text(post.get("title", "No Title"), class_name="text-sm font-bold text-slate-900 truncate"),
+                    rx.text("Tiêu đề:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
+                    rx.text(post.get("title", "Không có tiêu đề"), class_name="text-sm font-bold text-slate-900 truncate"),
                     spacing="2",
                     align="center",
                     width="100%",
                     class_name="mb-1.5",
                 ),
                 rx.hstack(
-                    rx.text("Mo ta:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
+                    rx.text("Mô tả:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
                     rx.text(post.get("description", ""), class_name="text-sm text-slate-700 truncate"),
                     spacing="2",
                     align="center",
@@ -89,12 +89,12 @@ def _admin_post_card(post: dict) -> rx.Component:
                 ),
                 rx.hstack(
                     rx.button(
-                        "DUYET",
+                        "DUYỆT",
                         on_click=AppState.admin_moderate_post(pid, "approve"),
                         class_name="inline-flex items-center justify-center h-10 min-w-[96px] text-xs font-semibold text-emerald-700 bg-emerald-50 px-3 py-2 rounded-lg hover:bg-emerald-100 transition-all",
                     ),
                     rx.button(
-                        "TU CHOI",
+                        "TỪ CHỐI",
                         on_click=AppState.admin_moderate_post(pid, "reject"),
                         class_name="inline-flex items-center justify-center h-10 min-w-[96px] text-xs font-semibold text-red-600 bg-red-50 px-3 py-2 rounded-lg hover:bg-red-100 transition-all",
                     ),
@@ -111,7 +111,7 @@ def _admin_post_card(post: dict) -> rx.Component:
 
 def _admin_removed_post_card(post: dict) -> rx.Component:
     has_image = (post.get("image") != None) & (post.get("image") != "")
-    post_type = rx.cond(post.get("type") == "LOST", "Mat do", "Nhat duoc")
+    post_type = rx.cond(post.get("type") == "LOST", "Mất đồ", "Nhặt được")
     return rx.el.div(
         rx.el.div(
             rx.vstack(
@@ -129,7 +129,7 @@ def _admin_removed_post_card(post: dict) -> rx.Component:
                 rx.hstack(
                     rx.el.span(post_type, class_name="bg-orange-50 text-[#ff4500] text-[10px] font-bold px-2 py-1 rounded-full"),
                     rx.el.span(post.get("category", "Uncategorized"), class_name="bg-purple-50 text-purple-600 text-[10px] font-bold px-2 py-1 rounded-full"),
-                    rx.el.span("Da xoa", class_name="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-1 rounded-full"),
+                    rx.el.span("Đã xóa", class_name="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-1 rounded-full"),
                     spacing="2",
                     wrap="wrap",
                     class_name="w-full",
@@ -140,7 +140,7 @@ def _admin_removed_post_card(post: dict) -> rx.Component:
             ),
             rx.el.div(
                 rx.hstack(
-                    rx.text("Nguoi dang:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
+                    rx.text("Người đăng:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
                     rx.text(post.get("username"), class_name="text-sm font-bold text-[#ff4500] truncate"),
                     spacing="2",
                     align="center",
@@ -148,15 +148,15 @@ def _admin_removed_post_card(post: dict) -> rx.Component:
                     class_name="mb-1.5",
                 ),
                 rx.hstack(
-                    rx.text("Tieu de:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
-                    rx.text(post.get("title", "No Title"), class_name="text-sm font-bold text-slate-900 truncate"),
+                    rx.text("Tiêu đề:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
+                    rx.text(post.get("title", "Không có tiêu đề"), class_name="text-sm font-bold text-slate-900 truncate"),
                     spacing="2",
                     align="center",
                     width="100%",
                     class_name="mb-1.5",
                 ),
                 rx.hstack(
-                    rx.text("Mo ta:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
+                    rx.text("Mô tả:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
                     rx.text(post.get("description", ""), class_name="text-sm text-slate-700 truncate"),
                     spacing="2",
                     align="center",
@@ -205,9 +205,9 @@ def _admin_removed_post_card(post: dict) -> rx.Component:
 def _admin_report_card(report: dict) -> rx.Component:
     rid = report.get("id", 0)
     pid = report.get("post_id", 0)
-    r_name = report.get("reporter_username", "Nguoi dung")
+    r_name = report.get("reporter_username", "Người dùng")
     has_image = (report.get("post_image") != None) & (report.get("post_image") != "")
-    post_type = rx.cond(report.get("post_type") == "LOST", "Mat do", "Nhat duoc")
+    post_type = rx.cond(report.get("post_type") == "LOST", "Mất đồ", "Nhặt được")
     return rx.el.div(
         rx.el.div(
             rx.vstack(
@@ -227,7 +227,7 @@ def _admin_report_card(report: dict) -> rx.Component:
                     rx.el.span(report.get("post_category", "Uncategorized"), class_name="bg-purple-50 text-purple-600 text-[10px] font-bold px-2 py-1 rounded-full"),
                     rx.hstack(
                         rx.icon("circle-alert", size=12, class_name="text-red-500"),
-                        rx.text("Bao cao", class_name="text-[10px] font-bold text-red-600"),
+                        rx.text("Báo cáo", class_name="text-[10px] font-bold text-red-600"),
                         spacing="1",
                         align="center",
                         class_name="bg-red-50 px-2 py-1 rounded-full",
@@ -242,30 +242,30 @@ def _admin_report_card(report: dict) -> rx.Component:
             ),
             rx.el.div(
                 rx.hstack(
-                    rx.text("Nguoi dang:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
-                    rx.text("Nguoi dung", class_name="text-sm font-bold text-[#ff4500]"),
+                    rx.text("Người đăng:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
+                    rx.text("Người dùng", class_name="text-sm font-bold text-[#ff4500]"),
                     spacing="2",
                     align="center",
                     width="100%",
                     class_name="mb-1.5",
                 ),
                 rx.hstack(
-                    rx.text("Tieu de:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
-                    rx.text(report.get("post_title", "Bai viet bi bao cao"), class_name="text-sm font-bold text-slate-900 truncate"),
+                    rx.text("Tiêu đề:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
+                    rx.text(report.get("post_title", "Bài viết bị báo cáo"), class_name="text-sm font-bold text-slate-900 truncate"),
                     spacing="2",
                     align="center",
                     width="100%",
                     class_name="mb-1.5",
                 ),
                 rx.hstack(
-                    rx.text("Mo ta:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
+                    rx.text("Mô tả:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
                     rx.text(report.get("post_description", ""), class_name="text-sm text-slate-700 truncate"),
                     spacing="2",
                     align="center",
                     width="100%",
                 ),
                 rx.hstack(
-                    rx.text("Bao cao tu:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
+                    rx.text("Báo cáo từ:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
                     rx.text(r_name, class_name="text-sm font-semibold text-slate-700"),
                     spacing="2",
                     align="center",
@@ -314,12 +314,12 @@ def _admin_report_card(report: dict) -> rx.Component:
                 ),
                 rx.hstack(
                     rx.link(
-                        "Xem bai viet",
+                        "Xem bài viết",
                         href=f"/post/{pid}",
                         class_name="inline-flex items-center justify-center h-10 min-w-[110px] text-xs font-semibold text-blue-600 bg-blue-50 px-3 py-2 rounded-lg hover:bg-blue-100 transition-all",
                     ),
                     rx.button(
-                        "GO BAI VIET",
+                        "GỠ BÀI VIẾT",
                         on_click=AppState.admin_delete_post_report(pid, rid),
                         class_name="inline-flex items-center justify-center h-10 min-w-[110px] text-xs font-semibold text-red-600 bg-red-50 px-3 py-2 rounded-lg hover:bg-red-100 transition-all",
                     ),
@@ -343,7 +343,7 @@ def admin_page() -> rx.Component:
                         rx.el.div(
                             rx.hstack(
                                 rx.icon("shield-check", size=24, class_name="text-[#ff4500]"),
-                                rx.heading("Admin Control Panel", size="6"),
+                                rx.heading("Bảng quản trị", size="6"),
                                 spacing="2",
                                 align="center",
                                 class_name="mb-6"
@@ -351,7 +351,7 @@ def admin_page() -> rx.Component:
                             # TABS
                             rx.hstack(
                                 rx.button(
-                                    "Duyet bai",
+                                    "Duyệt bài",
                                     on_click=lambda: AppState.set_admin_tab("posts"),
                                     class_name=rx.cond(
                                         AppState.admin_tab == "posts",
@@ -360,7 +360,7 @@ def admin_page() -> rx.Component:
                                     )
                                 ),
                                 rx.button(
-                                    "Danh sach Bao cao",
+                                    "Danh sách báo cáo",
                                     on_click=lambda: AppState.set_admin_tab("reports"),
                                     class_name=rx.cond(
                                         AppState.admin_tab == "reports",
@@ -369,7 +369,7 @@ def admin_page() -> rx.Component:
                                     )
                                 ),
                                 rx.button(
-                                    "Cac bai da xoa",
+                                    "Các bài đã xóa",
                                     on_click=lambda: AppState.set_admin_tab("removed"),
                                     class_name=rx.cond(
                                         AppState.admin_tab == "removed",
@@ -402,7 +402,7 @@ def admin_page() -> rx.Component:
                                             rx.center(
                                                 rx.vstack(
                                                     rx.icon("check-check", size=48, class_name="text-slate-200"),
-                                                    rx.text("Khong co bai nao cho duyet.", class_name="text-slate-400 font-medium"),
+                                                    rx.text("Không có bài nào chờ duyệt.", class_name="text-slate-400 font-medium"),
                                                     align="center"
                                                 ),
                                                 class_name="py-20 w-full"
@@ -424,7 +424,7 @@ def admin_page() -> rx.Component:
                                                 rx.center(
                                                     rx.vstack(
                                                         rx.icon("flag", size=48, class_name="text-slate-200"),
-                                                        rx.text("Khong co bao cao nao.", class_name="text-slate-400 font-medium"),
+                                                        rx.text("Không có báo cáo nào.", class_name="text-slate-400 font-medium"),
                                                         align="center"
                                                     ),
                                                     class_name="py-20 w-full"
@@ -444,7 +444,7 @@ def admin_page() -> rx.Component:
                                                 rx.center(
                                                     rx.vstack(
                                                         rx.icon("archive-x", size=48, class_name="text-slate-200"),
-                                                        rx.text("Chua co bai nao trong muc da xoa.", class_name="text-slate-400 font-medium"),
+                                                        rx.text("Chưa có bài nào trong mục đã xóa.", class_name="text-slate-400 font-medium"),
                                                         align="center"
                                                     ),
                                                     class_name="py-20 w-full"
@@ -471,8 +471,8 @@ def admin_page() -> rx.Component:
                 rx.center(
                     rx.vstack(
                         rx.icon("lock", size=48, class_name="text-slate-200"),
-                        rx.text("Ban khong co quyen truy cap vao trang nay.", class_name="text-slate-500 font-medium"),
-                        rx.link("Ve trang chu", href="/", class_name="text-[#ff4500] hover:underline"),
+                        rx.text("Bạn không có quyền truy cập vào trang này.", class_name="text-slate-500 font-medium"),
+                        rx.link("Về trang chủ", href="/", class_name="text-[#ff4500] hover:underline"),
                         align="center",
                         spacing="3"
                     ),

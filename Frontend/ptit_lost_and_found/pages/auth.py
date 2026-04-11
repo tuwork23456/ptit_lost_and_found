@@ -10,17 +10,17 @@ def _auth_banner() -> rx.Component:
         rx.el.div(class_name="absolute bottom-[30%] left-[15%] w-28 h-10 bg-white/10 rounded-full blur-md animate-pulse"),
         rx.el.div(
             rx.el.span(
-                "Cong dong sinh vien PTIT",
+                "Cộng đồng sinh viên PTIT",
                 class_name="inline-flex items-center rounded-full bg-white/20 px-3 py-1 text-xs font-semibold tracking-wide mb-4",
             ),
             rx.el.h1(
                 "Tìm đồ thất lạc PTIT",
                 rx.el.br(),
-                "Ket noi sinh vien va tim lai do that lac trong hoc vien",
+                "Kết nối sinh viên và tìm lại đồ thất lạc trong học viện",
                 class_name="text-4xl font-bold leading-tight mb-4",
             ),
             rx.el.p(
-                "Nen tang chi phuc vu cong dong sinh vien Hoc vien Cong nghe Buu chinh Vien thong.",
+                "Nền tảng chỉ phục vụ cộng đồng sinh viên Học viện Công nghệ Bưu chính Viễn thông.",
                 class_name="text-sm md:text-base text-white/90 max-w-md",
             ),
             class_name="relative z-10 text-white max-w-lg",
@@ -36,7 +36,7 @@ def login_page() -> rx.Component:
             rx.el.div(
                 rx.el.h2("Đăng nhập", class_name="text-2xl font-bold text-slate-800 mb-2"),
                 rx.el.p(
-                    "Su dung tai khoan sinh vien PTIT de tiep tuc.",
+                    "Sử dụng tài khoản sinh viên PTIT để tiếp tục.",
                     class_name="text-sm text-slate-500 mb-6",
                 ),
                 rx.cond(
@@ -64,7 +64,7 @@ def login_page() -> rx.Component:
                                 auto_complete=True,
                                 value=AppState.login_email,
                                 on_change=AppState.set_login_email,
-                                class_name="w-full h-12 rounded-xl border border-gray-200 bg-white px-4 text-base leading-6 text-gray-800 placeholder:text-gray-400 placeholder:leading-6 outline-none focus:border-[#319795] focus:ring-2 focus:ring-[#319795]/20",
+                                class_name="w-full h-12 rounded-xl border border-gray-200 bg-white px-4 text-base leading-6 text-gray-800 placeholder:text-gray-400 placeholder:leading-6 outline-none focus:border-[#ff4500] focus:ring-2 focus:ring-[#ff4500]/20",
                             ),
                             spacing="2",
                             width="100%",
@@ -78,7 +78,7 @@ def login_page() -> rx.Component:
                                 auto_complete=True,
                                 value=AppState.login_password,
                                 on_change=AppState.set_login_password,
-                                class_name="w-full h-12 rounded-xl border border-gray-200 bg-white px-4 text-base leading-6 text-gray-800 placeholder:text-gray-400 placeholder:leading-6 outline-none focus:border-[#319795] focus:ring-2 focus:ring-[#319795]/20",
+                                class_name="w-full h-12 rounded-xl border border-gray-200 bg-white px-4 text-base leading-6 text-gray-800 placeholder:text-gray-400 placeholder:leading-6 outline-none focus:border-[#ff4500] focus:ring-2 focus:ring-[#ff4500]/20",
                             ),
                             spacing="2",
                             width="100%",
@@ -87,7 +87,7 @@ def login_page() -> rx.Component:
                             rx.cond(AppState.loading, "ĐANG XỬ LÝ...", "ĐĂNG NHẬP"),
                             type="submit",
                             disabled=AppState.loading,
-                            class_name="w-full rounded-xl py-3.5 font-bold text-white bg-[#319795] hover:bg-[#2c7a7b] transition-all",
+                            class_name="w-full rounded-xl py-3.5 font-bold text-white bg-[#ff4500] hover:bg-[#e63e00] transition-all",
                         ),
                         spacing="4",
                         width="100%",
@@ -96,7 +96,7 @@ def login_page() -> rx.Component:
                 ),
                 rx.text(
                     "Bạn chưa có tài khoản? ",
-                    rx.link("Đăng ký ngay", href="/register", class_name="text-[#ff4500] hover:underline font-semibold"),
+                    rx.link("Đăng ký ngay", href="/register", class_name="text-[#ff4500] hover:text-[#c43300] hover:underline font-semibold"),
                     class_name="mt-8 text-center text-sm font-medium text-gray-500",
                 ),
                 class_name="w-full max-w-sm",
@@ -115,7 +115,7 @@ def register_page() -> rx.Component:
             rx.el.div(
                 rx.el.h2("Đăng ký tài khoản", class_name="text-2xl font-bold text-slate-800 mb-2"),
                 rx.el.p(
-                    "Tao tai khoan de tham gia dien dan tim do that lac cua sinh vien PTIT.",
+                    "Tạo tài khoản để tham gia diễn đàn tìm đồ thất lạc của sinh viên PTIT.",
                     class_name="text-slate-500 text-sm mb-6 font-medium",
                 ),
                 rx.cond(
@@ -139,7 +139,7 @@ def register_page() -> rx.Component:
                             name="username",
                             value=AppState.register_username,
                             on_change=AppState.set_register_username,
-                            class_name="w-full h-12 rounded-xl border border-gray-200 bg-white px-4 text-base leading-6 text-gray-800 placeholder:text-gray-400 placeholder:leading-6 outline-none focus:border-[#319795] focus:ring-2 focus:ring-[#319795]/20",
+                            class_name="w-full h-12 rounded-xl border border-gray-200 bg-white px-4 text-base leading-6 text-gray-800 placeholder:text-gray-400 placeholder:leading-6 outline-none focus:border-[#ff4500] focus:ring-2 focus:ring-[#ff4500]/20",
                         ),
                         rx.input(
                             placeholder="Email",
@@ -148,7 +148,7 @@ def register_page() -> rx.Component:
                             auto_complete=True,
                             value=AppState.register_email,
                             on_change=AppState.set_register_email,
-                            class_name="w-full h-12 rounded-xl border border-gray-200 bg-white px-4 text-base leading-6 text-gray-800 placeholder:text-gray-400 placeholder:leading-6 outline-none focus:border-[#319795] focus:ring-2 focus:ring-[#319795]/20",
+                            class_name="w-full h-12 rounded-xl border border-gray-200 bg-white px-4 text-base leading-6 text-gray-800 placeholder:text-gray-400 placeholder:leading-6 outline-none focus:border-[#ff4500] focus:ring-2 focus:ring-[#ff4500]/20",
                         ),
                         rx.input(
                             placeholder="Mật khẩu",
@@ -157,7 +157,7 @@ def register_page() -> rx.Component:
                             auto_complete=True,
                             value=AppState.register_password,
                             on_change=AppState.set_register_password,
-                            class_name="w-full h-12 rounded-xl border border-gray-200 bg-white px-4 text-base leading-6 text-gray-800 placeholder:text-gray-400 placeholder:leading-6 outline-none focus:border-[#319795] focus:ring-2 focus:ring-[#319795]/20",
+                            class_name="w-full h-12 rounded-xl border border-gray-200 bg-white px-4 text-base leading-6 text-gray-800 placeholder:text-gray-400 placeholder:leading-6 outline-none focus:border-[#ff4500] focus:ring-2 focus:ring-[#ff4500]/20",
                         ),
                         rx.input(
                             placeholder="Xác nhận mật khẩu",
@@ -166,13 +166,13 @@ def register_page() -> rx.Component:
                             auto_complete=True,
                             value=AppState.register_confirm_password,
                             on_change=AppState.set_register_confirm_password,
-                            class_name="w-full h-12 rounded-xl border border-gray-200 bg-white px-4 text-base leading-6 text-gray-800 placeholder:text-gray-400 placeholder:leading-6 outline-none focus:border-[#319795] focus:ring-2 focus:ring-[#319795]/20",
+                            class_name="w-full h-12 rounded-xl border border-gray-200 bg-white px-4 text-base leading-6 text-gray-800 placeholder:text-gray-400 placeholder:leading-6 outline-none focus:border-[#ff4500] focus:ring-2 focus:ring-[#ff4500]/20",
                         ),
                         rx.button(
                             rx.cond(AppState.loading, "ĐANG TẠO TÀI KHOẢN...", "ĐĂNG KÝ NGAY"),
                             type="submit",
                             disabled=AppState.loading,
-                            class_name="w-full rounded-xl py-3.5 font-bold text-white bg-[#319795] hover:bg-[#2c7a7b] transition-all",
+                            class_name="w-full rounded-xl py-3.5 font-bold text-white bg-[#ff4500] hover:bg-[#e63e00] transition-all",
                         ),
                         spacing="3",
                         width="100%",
@@ -181,7 +181,7 @@ def register_page() -> rx.Component:
                 ),
                 rx.text(
                     "Đã có tài khoản? ",
-                    rx.link("Đăng nhập ngay", href="/login", class_name="text-[#ff4500] hover:underline font-semibold"),
+                    rx.link("Đăng nhập ngay", href="/login", class_name="text-[#ff4500] hover:text-[#c43300] hover:underline font-semibold"),
                     class_name="mt-8 text-center text-sm font-medium text-gray-500",
                 ),
                 class_name="w-full max-w-sm",

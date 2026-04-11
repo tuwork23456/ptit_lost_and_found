@@ -24,9 +24,9 @@ class AppState(rx.State):
     posts: list[dict] = []
     posts_loading: bool = False
     search_query: str = ""
-    selected_type: str = "Tat ca loai tin"
-    selected_category: str = "Tat ca danh muc"
-    selected_location: str = "Tat ca khu vuc"
+    selected_type: str = "Tất cả loại tin"
+    selected_category: str = "Tất cả danh mục"
+    selected_location: str = "Tất cả khu vực"
     current_page: int = 1
     items_per_page: int = 6
     search_total: int = 0
@@ -184,11 +184,16 @@ class AppState(rx.State):
         self.success_message = ""
 
     @staticmethod
+    def _is_empty_location_choice(val: str) -> bool:
+        v = (val or "").strip().lower()
+        return v in {"", "khong co", "không có"}
+
+    @staticmethod
     def _normalize_comment(comment: dict) -> dict:
         user = comment.get("user") if isinstance(comment, dict) else None
-        username = "An danh"
+        username = "Ẩn danh"
         if isinstance(user, dict):
-            username = str(user.get("username") or "An danh")
+            username = str(user.get("username") or "Ẩn danh")
         elif comment.get("username"):
             username = str(comment.get("username"))
         normalized = dict(comment)
@@ -220,7 +225,7 @@ class AppState(rx.State):
         def walk(nodes: list[dict], depth: int, reply_to_user: str = "") -> None:
             for node in nodes:
                 node_id = node.get("id")
-                username = str(node.get("username") or "An danh")
+                username = str(node.get("username") or "Ẩn danh")
                 item = dict(node)
                 item["depth"] = depth
                 item["is_reply"] = depth > 0
@@ -235,7 +240,7 @@ class AppState(rx.State):
     def _normalize_post(self, post: dict) -> dict:
         normalized = dict(post) if isinstance(post, dict) else {}
         owner = normalized.get("owner") if isinstance(normalized.get("owner"), dict) else {}
-        username = str(owner.get("username") or normalized.get("username") or "Nguoi dung PTIT")
+        username = str(owner.get("username") or normalized.get("username") or "Người dùng PTIT")
         normalized["username"] = username
         raw_image = str(
             normalized.get("image")
@@ -309,7 +314,7 @@ class AppState(rx.State):
             normalized["post_created_date"] = created_date
             normalized["post_created_time"] = created_time
         rep = normalized.get("reporter")
-        uname = "Nguoi dung"
+        uname = "Người dùng"
         if isinstance(rep, dict):
             u = rep.get("username")
             if u is not None and str(u).strip():
@@ -331,7 +336,7 @@ class AppState(rx.State):
             raw_posts = data if isinstance(data, list) else []
             self.posts = [self._normalize_post(p) for p in raw_posts]
         except Exception:
-            self.error_message = "Khong tai duoc danh sach bai viet."
+            self.error_message = "Không tải được danh sách bài viết."
             self.posts = []
         finally:
             self.posts_loading = False
@@ -343,13 +348,13 @@ class AppState(rx.State):
         self.error_message = ""
         try:
             selected_type = ""
-            if self.selected_type == "Mat do":
+            if self.selected_type == "Mất đồ":
                 selected_type = "LOST"
-            elif self.selected_type == "Nhat duoc":
+            elif self.selected_type == "Nhặt được":
                 selected_type = "FOUND"
 
-            search_category = "" if self.selected_category == "Tat ca danh muc" else self.selected_category
-            search_location = "" if self.selected_location == "Tat ca khu vuc" else self.selected_location
+            search_category = "" if self.selected_category == "Tất cả danh mục" else self.selected_category
+            search_location = "" if self.selected_location == "Tất cả khu vực" else self.selected_location
             per_page = 50
 
             async def _fetch_all_for_type(type_value: str) -> tuple[list[dict], int]:
@@ -406,7 +411,7 @@ class AppState(rx.State):
         except Exception:
             if req_id != self.search_request_seq:
                 return
-            self.error_message = "Khong tai duoc ket qua tim kiem."
+            self.error_message = "Không tải được kết quả tìm kiếm."
             self.search_results = []
             self.search_total = 0
         finally:
@@ -456,23 +461,23 @@ class AppState(rx.State):
     def create_post_preview_title(self) -> str:
         category = (
             self.create_post_custom_category.strip()
-            if self.create_post_category == "Khac"
+            if self.create_post_category == "Khác"
             else self.create_post_category.strip()
         )
         location = (
             self.create_post_custom_location.strip()
-            if self.create_post_location == "Khac"
-            else ("" if self.create_post_location == "Khong co" else self.create_post_location.strip())
+            if self.create_post_location == "Khác"
+            else ("" if self._is_empty_location_choice(self.create_post_location) else self.create_post_location.strip())
         )
         if not category:
-            category = "do vat"
-        prefix = "Tim" if self.create_post_type == "LOST" else "Nhat duoc"
-        return f"{prefix} {category}" + (f" tai {location}" if location else "")
+            category = "đồ vật"
+        prefix = "Tìm" if self.create_post_type == "LOST" else "Nhặt được"
+        return f"{prefix} {category}" + (f" tại {location}" if location else "")
 
     @rx.var
     def available_categories(self) -> list[str]:
         values = sorted({str(p.get("category", "")).strip() for p in self.posts if p.get("category")})
-        return ["Tat ca danh muc", *values]
+        return ["Tất cả danh mục", *values]
 
     @rx.var
     def available_locations(self) -> list[str]:
@@ -484,7 +489,7 @@ class AppState(rx.State):
                 and str(p.get("location", "")).strip().lower() not in {"khong co", "không có"}
             }
         )
-        return ["Tat ca khu vuc", *values]
+        return ["Tất cả khu vực", *values]
 
     @rx.var
     def filtered_posts(self) -> list[dict]:
@@ -589,7 +594,7 @@ class AppState(rx.State):
             email = self._form_value(form_data, "email", self.login_email).strip().lower()
             password = self._form_value(form_data, "password", self.login_password)
             if not email or not password:
-                self.error_message = "Vui long nhap day du email va mat khau."
+                self.error_message = "Vui lòng nhập đầy đủ email và mật khẩu."
                 return
             payload = {"email": email, "password": password}
             login_urls = [f"{b.rstrip('/')}/auth/login" for b in self._api_candidates()]
@@ -622,17 +627,17 @@ class AppState(rx.State):
                         code = e.response.status_code
                         if code == 429:
                             self.error_message = (
-                                "Dang nhap that bai qua nhieu lan. Vui long doi khoang 15 phut roi thu lai."
+                                "Đăng nhập thất bại quá nhiều lần. Vui lòng đợi khoảng 15 phút rồi thử lại."
                             )
                         elif code == 422:
                             self.error_message = (
-                                "Email hoac dinh dang khong hop le. Vui long kiem tra lai."
+                                "Email hoặc định dạng không hợp lệ. Vui lòng kiểm tra lại."
                             )
                         elif code == 401:
-                            self.error_message = "Sai email hoac mat khau. Vui long kiem tra lai."
+                            self.error_message = "Sai email hoặc mật khẩu. Vui lòng kiểm tra lại."
                         else:
                             self.error_message = str(
-                                detail or "Dang nhap that bai. Vui long kiem tra lai thong tin."
+                                detail or "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin."
                             )
                         self.loading = False
                         return
@@ -641,12 +646,12 @@ class AppState(rx.State):
 
             if data is None:
                 self.error_message = (
-                    "Khong ket noi duoc backend dang nhap (da thu port 8000/8001). "
-                    "Hay kiem tra backend da chay chua."
+                    "Không kết nối được backend đăng nhập (đã thử cổng 8000/8001). "
+                    "Hãy kiểm tra backend đã chạy chưa."
                 )
                 if last_error:
                     self.error_message = (
-                        "Khong ket noi duoc backend dang nhap. Vui long bat backend truoc."
+                        "Không kết nối được backend đăng nhập. Vui lòng bật backend trước."
                     )
                 self.loading = False
                 return
@@ -656,13 +661,12 @@ class AppState(rx.State):
             self.user_id = str(user.get("id", "") or "")
             self.user_email = user.get("email", email)
             self.user_role = str(user.get("role", "USER") or "USER").upper()
-            self.success_message = "Dang nhap thanh cong."
             if not self.token:
-                self.error_message = "Dang nhap that bai: server khong tra ve token."
+                self.error_message = "Đăng nhập thất bại: server không trả về token."
                 return
             return rx.redirect("/")
         except Exception:
-            self.error_message = "Dang nhap that bai. Vui long thu lai."
+            self.error_message = "Đăng nhập thất bại. Vui lòng thử lại."
         finally:
             self.loading = False
 
@@ -678,11 +682,11 @@ class AppState(rx.State):
         self.register_password = reg_password
         self.register_confirm_password = reg_confirm
         if reg_password != reg_confirm:
-            self.error_message = "Mat khau xac nhan khong khop."
+            self.error_message = "Mật khẩu xác nhận không khớp."
             self.loading = False
             return
         if len(reg_password) < 8:
-            self.error_message = "Mat khau phai co it nhat 8 ky tu, gom chu hoa, chu thuong va so."
+            self.error_message = "Mật khẩu phải có ít nhất 8 ký tự, gồm chữ hoa, chữ thường và số."
             self.loading = False
             return
         # Đồng bộ validation với backend: phải có chữ hoa, chữ thường và số
@@ -691,7 +695,7 @@ class AppState(rx.State):
             or not re.search(r"[a-z]", reg_password)
             or not re.search(r"\d", reg_password)
         ):
-            self.error_message = "Mat khau phai co it nhat 1 chu hoa, 1 chu thuong va 1 so."
+            self.error_message = "Mật khẩu phải có ít nhất 1 chữ hoa, 1 chữ thường và 1 số."
             self.loading = False
             return
         try:
@@ -715,20 +719,20 @@ class AppState(rx.State):
                             detail = (e.response.json() or {}).get("detail", "")
                         except Exception:
                             detail = e.response.text
-                        self.error_message = str(detail or "Dang ky that bai.")
+                        self.error_message = str(detail or "Đăng ký thất bại.")
                         self.loading = False
                         return
                     except httpx.RequestError:
                         continue
 
             if not ok:
-                self.error_message = "Khong ket noi duoc backend dang ky. Vui long bat backend truoc."
+                self.error_message = "Không kết nối được backend đăng ký. Vui lòng bật backend trước."
                 self.loading = False
                 return
-            self.success_message = "Dang ky thanh cong. Moi ban dang nhap."
+            self.success_message = "Đăng ký thành công. Mời bạn đăng nhập."
             return rx.redirect("/login")
         except Exception:
-            self.error_message = "Dang ky that bai. Email co the da ton tai."
+            self.error_message = "Đăng ký thất bại. Email có thể đã tồn tại."
         finally:
             self.loading = False
 
@@ -749,7 +753,7 @@ class AppState(rx.State):
         self.saved_post_ids_data = []
         post_id = self.router.page.params.get("id")
         if not post_id:
-            self.error_message = "Khong tim thay bai viet."
+            self.error_message = "Không tìm thấy bài viết."
             self.post_loading = False
             return
         try:
@@ -759,7 +763,7 @@ class AppState(rx.State):
             normalized_comments = [self._normalize_comment(c) for c in comments]
             self.post_comments = sorted(normalized_comments, key=lambda x: x.get("created_at", ""))
         except Exception:
-            self.error_message = "Khong tai duoc chi tiet bai viet."
+            self.error_message = "Không tải được chi tiết bài viết."
             self.current_post = {}
             self.post_comments = []
         finally:
@@ -767,7 +771,7 @@ class AppState(rx.State):
 
     async def submit_comment(self):
         if not self.is_logged_in or not self.token:
-            self.error_message = "Vui long dang nhap de binh luan."
+            self.error_message = "Vui lòng đăng nhập để bình luận."
             return rx.redirect("/login")
         content = self.comment_text.strip()
         post_id = self.router.page.params.get("id")
@@ -786,13 +790,13 @@ class AppState(rx.State):
         except httpx.HTTPStatusError as e:
             if e.response.status_code == 401:
                 return self.logout()
-            self.error_message = "Gui binh luan that bai."
+            self.error_message = "Gửi bình luận thất bại."
         except Exception:
-            self.error_message = "Gui binh luan that bai."
+            self.error_message = "Gửi bình luận thất bại."
 
     def set_post_reply_target(self, parent_id: int, target_name: str) -> None:
         self.post_reply_parent_id = int(parent_id) if parent_id else 0
-        self.post_reply_target_name = target_name or "nguoi dung"
+        self.post_reply_target_name = target_name or "người dùng"
 
     def cancel_post_reply(self) -> None:
         self.post_reply_parent_id = 0
@@ -801,7 +805,7 @@ class AppState(rx.State):
 
     async def submit_post_reply_current(self):
         if not self.is_logged_in or not self.token:
-            self.error_message = "Vui long dang nhap de tra loi."
+            self.error_message = "Vui lòng đăng nhập để trả lời."
             return rx.redirect("/login")
         post_id = self.router.page.params.get("id")
         content = self.post_reply_text.strip()
@@ -826,13 +830,13 @@ class AppState(rx.State):
         except httpx.HTTPStatusError as e:
             if e.response.status_code == 401:
                 return self.logout()
-            self.error_message = "Gui tra loi that bai."
+            self.error_message = "Gửi trả lời thất bại."
         except Exception:
-            self.error_message = "Gui tra loi that bai."
+            self.error_message = "Gửi trả lời thất bại."
 
     async def load_my_posts(self) -> None:
         if not self.is_logged_in or not self.token:
-            self.error_message = "Vui long dang nhap."
+            self.error_message = "Vui lòng đăng nhập."
             return rx.redirect("/login")
         self.posts_loading = True
         try:
@@ -847,10 +851,10 @@ class AppState(rx.State):
         except httpx.HTTPStatusError as e:
             if e.response.status_code == 401:
                 return self.logout()
-            self.error_message = "Khong tai duoc bai dang cua ban."
+            self.error_message = "Không tải được bài đăng của bạn."
             self.my_posts = []
         except Exception:
-            self.error_message = "Khong tai duoc bai dang cua ban."
+            self.error_message = "Không tải được bài đăng của bạn."
             self.my_posts = []
         finally:
             self.posts_loading = False
@@ -944,7 +948,7 @@ class AppState(rx.State):
                 resp.raise_for_status()
             self.my_posts = [p for p in self.my_posts if int(p.get("id", 0)) != int(post_id)]
         except Exception:
-            self.error_message = "Xoa bai that bai."
+            self.error_message = "Xóa bài thất bại."
 
     async def load_profile(self) -> None:
         self.profile_loading = True
@@ -957,7 +961,7 @@ class AppState(rx.State):
             target_id = self.user_id if self.user_id else ""
         if not target_id:
             self.profile_loading = False
-            self.error_message = "Khong tim thay nguoi dung."
+            self.error_message = "Không tìm thấy người dùng."
             return
         try:
             data = await self._request_json("GET", f"/users/{target_id}", timeout=15.0)
@@ -985,7 +989,7 @@ class AppState(rx.State):
                 self.profile_data = {}
         except Exception:
             self.profile_data = {}
-            self.error_message = "Khong tai duoc thong tin nguoi dung."
+            self.error_message = "Không tải được thông tin người dùng."
         finally:
             self.profile_loading = False
 
@@ -1145,7 +1149,7 @@ class AppState(rx.State):
             self.chat_input = ""
             await self.load_conversations()
         except Exception:
-            self.error_message = "Gui tin nhan that bai."
+            self.error_message = "Gửi tin nhắn thất bại."
 
     async def refresh_chat_data(self):
         if self.chat_view == "chat" and self.current_chat_receiver_id:
@@ -1277,30 +1281,34 @@ class AppState(rx.State):
 
     async def submit_create_post_with_file(self, files: list[rx.UploadFile]):
         if not self.is_logged_in or not self.token:
-            self.error_message = "Vui long dang nhap de dang tin."
+            self.error_message = "Vui lòng đăng nhập để đăng tin."
             return rx.redirect("/login")
 
         final_category = (
             self.create_post_custom_category.strip()
-            if self.create_post_category == "Khac"
+            if self.create_post_category == "Khác"
             else self.create_post_category.strip()
         )
         final_location = (
             self.create_post_custom_location.strip()
-            if self.create_post_location == "Khac"
-            else ("" if self.create_post_location == "Khong co" else self.create_post_location.strip())
+            if self.create_post_location == "Khác"
+            else (
+                ""
+                if self._is_empty_location_choice(self.create_post_location)
+                else self.create_post_location.strip()
+            )
         )
         if not final_category:
-            self.error_message = "Vui long chon loai do."
+            self.error_message = "Vui lòng chọn loại đồ."
             return
         if not self.create_post_title.strip():
-            self.error_message = "Vui long nhap tieu de."
+            self.error_message = "Vui lòng nhập tiêu đề."
             return
         if not self.create_post_description.strip():
-            self.error_message = "Vui long nhap noi dung."
+            self.error_message = "Vui lòng nhập nội dung."
             return
         if not self.create_post_contact.strip():
-            self.error_message = "Vui long nhap thong tin lien he."
+            self.error_message = "Vui lòng nhập thông tin liên hệ."
             return
 
         self.loading = True
@@ -1321,7 +1329,7 @@ class AppState(rx.State):
                 file_bytes = await file.read()
                 if len(file_bytes) > 5 * 1024 * 1024:
                     self.loading = False
-                    self.error_message = "File anh qua lon (toi da 5MB)."
+                    self.error_message = "File ảnh quá lớn (tối đa 5MB)."
                     return
                 file_payload = {"file": (file.filename, file_bytes, file.content_type or "application/octet-stream")}
                 has_file = True
@@ -1337,7 +1345,7 @@ class AppState(rx.State):
                     file_bytes = base64.b64decode(b64_data)
                     if len(file_bytes) > 5 * 1024 * 1024:
                         self.loading = False
-                        self.error_message = "File anh qua lon (toi da 5MB)."
+                        self.error_message = "File ảnh quá lớn (tối đa 5MB)."
                         return
                     file_payload = {"file": (f"post_upload.{ext}", file_bytes, mime)}
                     has_file = True
@@ -1354,9 +1362,9 @@ class AppState(rx.State):
             )
             created_post = self._normalize_post(created if isinstance(created, dict) else {})
             if has_file and not str(created_post.get("image") or "").strip():
-                self.error_message = "Dang tin thanh cong nhung anh chua duoc luu. Vui long cap nhat anh cho bai viet."
+                self.error_message = "Đăng tin thành công nhưng ảnh chưa được lưu. Vui lòng cập nhật ảnh cho bài viết."
                 return rx.redirect(f"/post/{int(created_post.get('id', 0))}" if created_post.get("id") else "/manage-post")
-            self.success_message = "Dang tin thanh cong."
+            self.success_message = "Đăng tin thành công."
             self.create_post_title = ""
             self.create_post_description = ""
             self.create_post_category = ""
@@ -1372,9 +1380,9 @@ class AppState(rx.State):
                 detail = (e.response.json() or {}).get("detail", "")
             except Exception:
                 detail = e.response.text
-            self.error_message = str(detail or "Dang tin that bai. Vui long thu lai.")
+            self.error_message = str(detail or "Đăng tin thất bại. Vui lòng thử lại.")
         except Exception:
-            self.error_message = "Dang tin that bai. Vui long thu lai."
+            self.error_message = "Đăng tin thất bại. Vui lòng thử lại."
         finally:
             self.loading = False
 
@@ -1390,7 +1398,7 @@ class AppState(rx.State):
         except Exception:
             pass
         if len(file_bytes) > 5 * 1024 * 1024:
-            self.error_message = "File anh qua lon (toi da 5MB)."
+            self.error_message = "File ảnh quá lớn (tối đa 5MB)."
             self.create_post_image_preview = ""
             return
         mime = file.content_type or "image/png"
@@ -1404,7 +1412,7 @@ class AppState(rx.State):
             return
         self.is_chat_open = True
         self.current_chat_receiver_id = int(receiver_id)
-        self.current_chat_receiver_name = receiver_name or "User"
+        self.current_chat_receiver_name = receiver_name or "Người dùng"
         self.chat_view = "chat"
         await self.load_chat_history()
         await self.mark_read(int(receiver_id))
@@ -1423,7 +1431,7 @@ class AppState(rx.State):
             return
         self.is_chat_open = True
         self.current_chat_receiver_id = int(receiver_id)
-        self.current_chat_receiver_name = receiver_name or "User"
+        self.current_chat_receiver_name = receiver_name or "Người dùng"
         self.chat_view = "chat"
         # Ghim ngữ cảnh bài viết theo cặp hội thoại (ghi đè banner cũ).
         if int(post_id or 0) > 0:
@@ -1436,7 +1444,7 @@ class AppState(rx.State):
                             "content": "",
                             "message_type": "context",
                             "post_id": int(post_id),
-                            "post_title": (post_title or "").strip() or f"Bai viet #{int(post_id)}",
+                            "post_title": (post_title or "").strip() or f"Bài viết #{int(post_id)}",
                         },
                         headers={"Authorization": f"Bearer {self.token}"},
                     )
@@ -1471,7 +1479,7 @@ class AppState(rx.State):
         self.feed_reply_text = ""
         self.feed_comment_post_title = post_title or ""
         self.feed_comment_post_owner_id = int(post_owner_id) if post_owner_id else 0
-        self.feed_comment_post_owner = post_owner or "Nguoi dung PTIT"
+        self.feed_comment_post_owner = post_owner or "Người dùng PTIT"
         self.feed_comment_post_created_at = post_created_at or ""
         self.feed_comment_post_description = post_description or ""
         self.feed_comment_post_image = post_image or ""
@@ -1503,7 +1511,7 @@ class AppState(rx.State):
 
     async def submit_feed_comment(self, post_id: int):
         if not self.is_logged_in or not self.token:
-            self.error_message = "Vui long dang nhap de binh luan."
+            self.error_message = "Vui lòng đăng nhập để bình luận."
             return rx.redirect("/login")
         content = self.feed_comment_text.strip()
         if not content or not post_id:
@@ -1521,13 +1529,13 @@ class AppState(rx.State):
         except httpx.HTTPStatusError as e:
             if e.response.status_code == 401:
                 return self.logout()
-            self.error_message = "Gui binh luan that bai."
+            self.error_message = "Gửi bình luận thất bại."
         except Exception:
-            self.error_message = "Gui binh luan that bai."
+            self.error_message = "Gửi bình luận thất bại."
 
     def set_feed_reply_target(self, parent_id: int, target_name: str) -> None:
         self.feed_reply_parent_id = int(parent_id) if parent_id else 0
-        self.feed_reply_target_name = target_name or "nguoi dung"
+        self.feed_reply_target_name = target_name or "người dùng"
 
     def cancel_feed_reply(self) -> None:
         self.feed_reply_parent_id = 0
@@ -1536,7 +1544,7 @@ class AppState(rx.State):
 
     async def submit_feed_reply_current(self):
         if not self.is_logged_in or not self.token:
-            self.error_message = "Vui long dang nhap de tra loi."
+            self.error_message = "Vui lòng đăng nhập để trả lời."
             return rx.redirect("/login")
         content = self.feed_reply_text.strip()
         post_id = self.feed_comment_post_id
@@ -1561,9 +1569,9 @@ class AppState(rx.State):
         except httpx.HTTPStatusError as e:
             if e.response.status_code == 401:
                 return self.logout()
-            self.error_message = "Gui tra loi that bai."
+            self.error_message = "Gửi trả lời thất bại."
         except Exception:
-            self.error_message = "Gui tra loi that bai."
+            self.error_message = "Gửi trả lời thất bại."
 
     def toggle_feed_report_box(self, post_id: int):
         if not post_id:
@@ -1579,11 +1587,11 @@ class AppState(rx.State):
 
     async def _submit_feed_report(self, post_id: int, reason_prefix: str = ""):
         if not self.is_logged_in or not self.token:
-            self.feed_action_message = "Vui long dang nhap de thuc hien."
+            self.feed_action_message = "Vui lòng đăng nhập để thực hiện."
             return rx.redirect("/login")
         reason = self.feed_report_reason.strip()
         if not reason:
-            self.feed_action_message = "Vui long nhap ly do."
+            self.feed_action_message = "Vui lòng nhập lý do."
             return
         if not post_id:
             return
@@ -1596,30 +1604,30 @@ class AppState(rx.State):
                     headers={"Authorization": f"Bearer {self.token}"},
                 )
                 resp.raise_for_status()
-            self.feed_action_message = "Da gui thanh cong."
+            self.feed_action_message = "Đã gửi thành công."
             self.feed_report_reason = ""
         except Exception:
-            self.feed_action_message = "Gui that bai. Vui long thu lai."
+            self.feed_action_message = "Gửi thất bại. Vui lòng thử lại."
 
     async def submit_feed_report(self, post_id: int):
         await self._submit_feed_report(post_id, "")
 
     async def submit_feed_remove_request(self, post_id: int):
-        await self._submit_feed_report(post_id, "[Yeu cau go bai] ")
+        await self._submit_feed_report(post_id, "[Yêu cầu gỡ bài] ")
 
     async def admin_remove_post(self, post_id: int):
         if not self.is_logged_in or not self.token:
-            self.feed_action_message = "Vui long dang nhap."
+            self.feed_action_message = "Vui lòng đăng nhập."
             return rx.redirect("/login")
         if not self.is_admin:
-            self.feed_action_message = "Ban khong co quyen admin."
+            self.feed_action_message = "Bạn không có quyền admin."
             return
         try:
             pid = int(post_id) if post_id else 0
         except Exception:
             pid = 0
         if pid <= 0:
-            self.feed_action_message = "Khong tim thay bai viet de go."
+            self.feed_action_message = "Không tìm thấy bài viết để gỡ."
             return
         try:
             await self._request_json(
@@ -1628,14 +1636,14 @@ class AppState(rx.State):
                 json={"action": "remove"},
                 headers={"Authorization": f"Bearer {self.token}"},
             )
-            self.feed_action_message = "Admin da chuyen bai vao muc da go."
+            self.feed_action_message = "Admin đã chuyển bài vào mục đã gỡ."
             await self.load_posts()
             self.admin_tab = "removed"
             await self.load_admin_removed_posts()
             self.current_post = {}
             return rx.redirect("/admin")
         except Exception:
-            self.feed_action_message = "Khong go duoc bai viet."
+            self.feed_action_message = "Không gỡ được bài viết."
 
     async def resolve_current_post(self):
         if not self.is_logged_in or not self.token:
@@ -1651,9 +1659,9 @@ class AppState(rx.State):
                 )
                 resp.raise_for_status()
             self.current_post = self._normalize_post(resp.json() or self.current_post)
-            self.post_action_message = "Da danh dau bai viet la da giai quyet."
+            self.post_action_message = "Đã đánh dấu bài viết là đã giải quyết."
         except Exception:
-            self.post_action_message = "Khong the cap nhat trang thai bai viet."
+            self.post_action_message = "Không thể cập nhật trạng thái bài viết."
 
     def close_post_report_box(self):
         self.show_post_report_box = False
@@ -1673,7 +1681,7 @@ class AppState(rx.State):
         post_id = self.router.page.params.get("id")
         reason = self.report_reason.strip()
         if not post_id or not reason:
-            self.post_action_message = "Vui long nhap ly do bao cao."
+            self.post_action_message = "Vui lòng nhập lý do báo cáo."
             return
         try:
             async with httpx.AsyncClient(timeout=15.0) as client:
@@ -1683,11 +1691,11 @@ class AppState(rx.State):
                     headers={"Authorization": f"Bearer {self.token}"},
                 )
                 resp.raise_for_status()
-            self.post_action_message = "Da gui bao cao thanh cong."
+            self.post_action_message = "Đã gửi báo cáo thành công."
             self.report_reason = ""
             self.show_post_report_box = False
         except Exception:
-            self.post_action_message = "Gui bao cao that bai."
+            self.post_action_message = "Gửi báo cáo thất bại."
 
     async def request_remove_current_post(self):
         if not self.is_logged_in or not self.token:
@@ -1695,21 +1703,21 @@ class AppState(rx.State):
         post_id = self.router.page.params.get("id")
         reason = self.report_reason.strip()
         if not post_id or not reason:
-            self.post_action_message = "Vui long nhap ly do yeu cau go bai."
+            self.post_action_message = "Vui lòng nhập lý do yêu cầu gỡ bài."
             return
         try:
             async with httpx.AsyncClient(timeout=15.0) as client:
                 resp = await client.post(
                     f"{self.api_base_url}/reports",
-                    json={"post_id": int(post_id), "reason": f"[Yeu cau go bai] {reason}"},
+                    json={"post_id": int(post_id), "reason": f"[Yêu cầu gỡ bài] {reason}"},
                     headers={"Authorization": f"Bearer {self.token}"},
                 )
                 resp.raise_for_status()
-            self.post_action_message = "Da gui yeu cau go bai thanh cong."
+            self.post_action_message = "Đã gửi yêu cầu gỡ bài thành công."
             self.report_reason = ""
             self.show_post_report_box = False
         except Exception:
-            self.post_action_message = "Gui yeu cau go bai that bai."
+            self.post_action_message = "Gửi yêu cầu gỡ bài thất bại."
 
 
     # ADMIN METHODS
@@ -1777,11 +1785,11 @@ class AppState(rx.State):
                 json={"action": action}, 
                 headers={"Authorization": f"Bearer {self.token}"}
             )
-            self.admin_action_message = f"Da {action.upper()} bai viet #{post_id}"
+            self.admin_action_message = f"Đã {action.upper()} bài viết #{post_id}"
             await self.load_admin_pending_posts()
             await self.load_posts()
         except Exception:
-            self.admin_action_message = f"Loi khi {action} bai viet"
+            self.admin_action_message = f"Lỗi khi {action} bài viết"
 
     async def admin_delete_post_report(self, post_id: int, report_id: int = 0):
         if not self.is_admin:
@@ -1795,11 +1803,11 @@ class AppState(rx.State):
         except Exception:
             rid = 0
         if pid <= 0:
-            self.admin_action_message = "Khong tim thay ID bai viet de go."
+            self.admin_action_message = "Không tìm thấy ID bài viết để gỡ."
             return
         try:
             await self._request_json("DELETE", f"/posts/{pid}", headers={"Authorization": f"Bearer {self.token}"})
-            self.admin_action_message = f"Da GO bai viet #{pid} thanh cong."
+            self.admin_action_message = f"Đã gỡ bài viết #{pid} thành công."
             await self.load_posts()
             self.admin_tab = "removed"
             await self.load_admin_removed_posts()
@@ -1810,7 +1818,7 @@ class AppState(rx.State):
                     self.admin_reports = [r for r in self.admin_reports if int(r.get("id", 0) or 0) != rid]
                 else:
                     self.admin_reports = [r for r in self.admin_reports if int(r.get("post_id", 0) or 0) != pid]
-                self.admin_action_message = f"Bai viet #{pid} da khong ton tai (da go truoc do)."
+                self.admin_action_message = f"Bài viết #{pid} đã không tồn tại (đã gỡ trước đó)."
                 await self.load_posts()
                 self.admin_tab = "removed"
                 await self.load_admin_removed_posts()
@@ -1820,20 +1828,20 @@ class AppState(rx.State):
                 detail = str((e.response.json() or {}).get("detail", ""))
             except Exception:
                 detail = e.response.text
-            self.admin_action_message = detail or "Khong the go bai viet"
+            self.admin_action_message = detail or "Không thể gỡ bài viết"
         except Exception:
-            self.admin_action_message = "Khong the go bai viet"
+            self.admin_action_message = "Không thể gỡ bài viết"
 
     async def run_health_check(self):
         self.health_status = "checking"
-        self.health_message = "Dang kiem tra ket noi backend..."
+        self.health_message = "Đang kiểm tra kết nối backend..."
         try:
             async with httpx.AsyncClient(timeout=8.0) as client:
                 resp = await client.get(f"{self.api_base_url}/posts")
                 resp.raise_for_status()
             self.health_status = "ok"
-            self.health_message = "Backend ket noi OK."
+            self.health_message = "Backend kết nối OK."
         except Exception:
             self.health_status = "error"
-            self.health_message = "Khong ket noi duoc backend. Kiem tra server/cors/env."
+            self.health_message = "Không kết nối được backend. Kiểm tra server/CORS/env."
 
