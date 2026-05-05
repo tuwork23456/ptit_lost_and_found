@@ -98,6 +98,18 @@ def _ensure_message_context_columns() -> None:
         pass
 
 
+def _ensure_user_is_active_column() -> None:
+    try:
+        with engine.connect() as conn:
+            rows = conn.exec_driver_sql("PRAGMA table_info(users)").fetchall()
+            cols = {str(r[1]) for r in rows}
+            if "is_active" not in cols:
+                conn.exec_driver_sql("ALTER TABLE users ADD COLUMN is_active BOOLEAN DEFAULT 1")
+                conn.commit()
+    except Exception:
+        pass
+
+
 def _purge_removed_posts_on_startup() -> None:
     """Auto hard-delete old REMOVED posts after retention period."""
     db = SessionLocal()
@@ -112,6 +124,7 @@ def _purge_removed_posts_on_startup() -> None:
 
 _ensure_comment_reply_column()
 _ensure_message_context_columns()
+_ensure_user_is_active_column()
 Base.metadata.create_all(bind=engine)
 _normalize_legacy_image_paths()
 _purge_removed_posts_on_startup()

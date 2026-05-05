@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.database.database import get_db
 from app.models.user import User
+from app.models.notification import Notification
 from app.core.security import get_current_user
 from app.schemas.messageschemas import MessageCreate, MessageResponse, ChatHistoryResponse
 from app.crud.message_crud import (
@@ -39,10 +40,24 @@ async def send_message(
 
     # 1. Lưu tin nhắn vào DB
     new_msg = create_message(db=db, message_data=message_data, sender_id=current_user.id)
+    if message_type == "text":
+        db.add(
+            Notification(
+                user_id=message_data.receiver_id,
+                message=f"Tin nhắn mới từ {current_user.username}",
+                type="MESSAGE",
+                target_id=current_user.id,
+            )
+        )
+        db.commit()
 
     # 2. Gửi tín hiệu WebSocket thời gian thực tới người nhận nếu đang online
     await manager.send_personal_message(
-        {"type": "new_message", "sender_id": current_user.id},
+        {
+            "type": "new_message",
+            "sender_id": current_user.id,
+            "receiver_id": message_data.receiver_id,
+        },
         user_id=message_data.receiver_id,
     )
 
@@ -85,6 +100,13 @@ def mark_read(
 ):
     """Mark all messages from sender_id → current_user as read."""
     mark_messages_read(db=db, receiver_id=current_user.id, sender_id=sender_id)
+    db.query(Notification).filter(
+        Notification.user_id == current_user.id,
+        Notification.type == "MESSAGE",
+        Notification.target_id == sender_id,
+        Notification.is_read == False,
+    ).update({"is_read": True})
+    db.commit()
     remaining = get_unread_count(db=db, user_id=current_user.id)
     return {"unread_count": remaining}
 

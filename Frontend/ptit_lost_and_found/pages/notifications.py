@@ -6,6 +6,7 @@ from ptit_lost_and_found.state import AppState
 def _notif_item(notif: dict) -> rx.Component:
     notif_id = notif.get("id")
     target_id = notif.get("target_id")
+    notif_type = notif.get("type")
     is_read = notif.get("is_read")
     created = rx.cond(notif.get("created_at") != None, notif.get("created_at"), "")
     return rx.el.button(
@@ -23,7 +24,7 @@ def _notif_item(notif: dict) -> rx.Component:
             spacing="1",
             width="100%",
         ),
-        on_click=AppState.mark_notification_read_and_open(notif_id, target_id),
+        on_click=AppState.mark_notification_read_and_open(notif_id, target_id, notif_type),
         class_name=rx.cond(
             is_read,
             "w-full text-left px-4 py-3 border border-gray-100 rounded-xl bg-white hover:bg-gray-50 transition",

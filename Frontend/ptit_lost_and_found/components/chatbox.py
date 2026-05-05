@@ -71,6 +71,21 @@ def chatbox() -> rx.Component:
         AppState.is_logged_in & AppState.is_chat_open,
         rx.el.div(
             rx.el.div(
+                rx.el.span(
+                    AppState.current_chat_receiver_id.to_string(),
+                    id="rt-chat-active-id",
+                    class_name="hidden",
+                ),
+                rx.el.span(
+                    AppState.chat_messages.length().to_string(),
+                    id="rt-chat-message-count",
+                    class_name="hidden",
+                ),
+                rx.el.span(
+                    AppState.chat_scroll_tick.to_string(),
+                    id="rt-chat-scroll-tick",
+                    class_name="hidden",
+                ),
                 rx.hstack(
                     rx.el.span("Tin nhắn", class_name="font-semibold text-sm text-slate-800"),
                     rx.spacer(),
@@ -178,6 +193,8 @@ def chatbox() -> rx.Component:
                                 class_name="h-full",
                             ),
                         ),
+                        rx.el.div(id="rt-chat-bottom-anchor", class_name="h-px w-full"),
+                        id="rt-chat-scroll-container",
                         class_name="flex-1 bg-slate-50 overflow-y-auto p-4 flex flex-col gap-3",
                     ),
                     rx.form(

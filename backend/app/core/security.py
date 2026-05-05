@@ -86,6 +86,11 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     user = db.query(User).filter(User.id == parsed_user_id).first()
     if user is None:
         raise credentials_exception
+    if not bool(getattr(user, "is_active", True)):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Tai khoan da bi khoa.",
+        )
 
     # 4. Trả về object User hợp lệ
     return user

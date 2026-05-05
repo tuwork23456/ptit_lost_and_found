@@ -27,10 +27,21 @@ def base_layout(content: rx.Component) -> rx.Component:
             id="rt-user-id",
             class_name="hidden",
         ),
+        rx.el.span(
+            AppState.api_base_url,
+            id="rt-api-base-url",
+            class_name="hidden",
+        ),
         rx.button(
             "",
             id="rt-refresh-chat-btn",
             on_click=AppState.refresh_chat_data,
+            class_name="hidden",
+        ),
+        rx.button(
+            "",
+            id="rt-message-ping-btn",
+            on_click=AppState.trigger_message_ping,
             class_name="hidden",
         ),
         rx.button(
@@ -46,9 +57,15 @@ def base_layout(content: rx.Component) -> rx.Component:
   window.__camNhamRtInitialized = true;
   let ws = null;
   let lastUid = "";
+  let lastChatScrollKey = "";
 
   const getUid = () => {
     const el = document.getElementById("rt-user-id");
+    return (el?.textContent || "").trim();
+  };
+
+  const getApiBase = () => {
+    const el = document.getElementById("rt-api-base-url");
     return (el?.textContent || "").trim();
   };
 
@@ -57,11 +74,60 @@ def base_layout(content: rx.Component) -> rx.Component:
     if (btn) btn.click();
   };
 
+  const autoScrollChatToBottom = () => {
+    const activeId = (document.getElementById("rt-chat-active-id")?.textContent || "").trim();
+    const msgCount = (document.getElementById("rt-chat-message-count")?.textContent || "").trim();
+    const tick = (document.getElementById("rt-chat-scroll-tick")?.textContent || "").trim();
+    const key = `${activeId}:${msgCount}:${tick}`;
+    if (!activeId || key === lastChatScrollKey) return;
+    lastChatScrollKey = key;
+    const container = document.getElementById("rt-chat-scroll-container");
+    const anchor = document.getElementById("rt-chat-bottom-anchor");
+    if (!container || !anchor) return;
+    const runScroll = () => {
+      try {
+        anchor.scrollIntoView({ block: "end", behavior: "auto" });
+        container.scrollTop = container.scrollHeight;
+      } catch (_) {}
+    };
+    requestAnimationFrame(runScroll);
+    setTimeout(runScroll, 80);
+    setTimeout(runScroll, 220);
+  };
+
+  const toWsUrl = (uid) => {
+    const rawBase = getApiBase();
+    let base = rawBase;
+    if (!base) {
+      base = `${window.location.protocol}//${window.location.host}`;
+    }
+    try {
+      const u = new URL(base);
+      const wsProto = u.protocol === "https:" ? "wss:" : "ws:";
+      return `${wsProto}//${u.host}/ws/${uid}`;
+    } catch (_) {
+      const wsProto = window.location.protocol === "https:" ? "wss:" : "ws:";
+      return `${wsProto}//${window.location.host}/ws/${uid}`;
+    }
+  };
+
   const setupWs = (uid) => {
     if (!uid) return;
     try {
-      ws = new WebSocket(`ws://localhost:8000/ws/${uid}`);
-      ws.onmessage = () => {
+      ws = new WebSocket(toWsUrl(uid));
+      ws.onmessage = (event) => {
+        let payload = {};
+        try { payload = JSON.parse(event.data || "{}"); } catch (_) {}
+        const type = payload?.type || "";
+        if (type === "new_message") {
+          clickIfExists("rt-message-ping-btn");
+          clickIfExists("rt-refresh-chat-btn");
+          return;
+        }
+        if (type === "new_notification") {
+          clickIfExists("rt-refresh-notif-btn");
+          return;
+        }
         clickIfExists("rt-refresh-chat-btn");
         clickIfExists("rt-refresh-notif-btn");
       };
@@ -83,7 +149,8 @@ def base_layout(content: rx.Component) -> rx.Component:
       lastUid = uid;
       if (uid) setupWs(uid);
     }
-  }, 1000);
+    autoScrollChatToBottom();
+  }, 250);
 })();
             """
         ),

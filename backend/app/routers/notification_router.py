@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
+from sqlalchemy import or_
 from typing import List
 from app.database.database import get_db
 from app.schemas.notificationschemas import NotificationResponse
@@ -16,7 +17,10 @@ def get_notifications(
 ):
     notifications = (
         db.query(Notification)
-        .filter(Notification.user_id == current_user.id)
+        .filter(
+            Notification.user_id == current_user.id,
+            or_(Notification.type.is_(None), Notification.type != "MESSAGE"),
+        )
         .order_by(Notification.created_at.desc())
         .all()
     )

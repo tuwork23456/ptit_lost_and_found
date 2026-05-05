@@ -92,6 +92,11 @@ def login_user(login_data: UserLogin, db: Session = Depends(get_db)):
             detail="Incorrect email or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    if not bool(getattr(user, "is_active", True)):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Tai khoan da bi khoa.",
+        )
     _clear_login_tracking(normalized_email)
 
     # 3. Xử lý khi xác thực thành công: Tạo JWT Token

@@ -19,6 +19,7 @@ class UserCreate(UserBase):
 class UserResponse(UserBase):
     id: int
     role: str = "USER"
+    is_active: bool = True
     created_at: datetime
 
     # Quan trọng: Cấu hình để Pydantic đọc dữ liệu từ SQLAlchemy Model object

@@ -4,11 +4,12 @@ from app.models.message import Message
 from app.schemas.messageschemas import MessageCreate
 
 def create_message(db: Session, message_data: MessageCreate, sender_id: int):
+    normalized_type = (message_data.message_type or "text").strip().lower()
     new_message = Message(
         content=message_data.content,
         sender_id=sender_id,
         receiver_id=message_data.receiver_id,
-        message_type=(message_data.message_type or "text"),
+        message_type=normalized_type,
         post_id=message_data.post_id,
         post_title=message_data.post_title,
     )

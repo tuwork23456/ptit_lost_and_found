@@ -1,4 +1,5 @@
 import re
+import asyncio
 import reflex as rx
 import httpx
 import base64
@@ -68,9 +69,11 @@ class AppState(rx.State):
     current_chat_receiver_id: int = 0
     current_chat_receiver_name: str = ""
     chat_messages: list[dict] = []
+    chat_scroll_tick: int = 0
     current_chat_pinned_post: dict = {}
     chat_input: str = ""
     unread_message_count: int = 0
+    message_ping_active: bool = False
     notifications: list[dict] = []
     show_notifications: bool = False
     show_messages_menu: bool = False
@@ -98,11 +101,14 @@ class AppState(rx.State):
     admin_pending_posts: list[dict] = []
     admin_reports: list[dict] = []
     admin_removed_posts: list[dict] = []
+    admin_locked_users: list[dict] = []
     admin_loading: bool = False
-    admin_tab: str = "posts"  # "posts" | "reports" | "removed"
+    admin_tab: str = "posts"  # "posts" | "reports" | "removed" | "locked_users"
     admin_action_message: str = ""
 
     api_base_url: str = "http://localhost:8000"
+    unread_badge_clear_delay_sec: float = 0.35
+    chat_realtime_autoread_delay_sec: float = 1.2
 
     def _api_candidates(self) -> list[str]:
         base = str(self.api_base_url or "http://localhost:8000").rstrip("/")
@@ -242,31 +248,10 @@ class AppState(rx.State):
         owner = normalized.get("owner") if isinstance(normalized.get("owner"), dict) else {}
         username = str(owner.get("username") or normalized.get("username") or "Người dùng PTIT")
         normalized["username"] = username
-        raw_image = str(
-            normalized.get("image")
-            or normalized.get("image_url")
-            or normalized.get("imagePath")
-            or ""
-        ).strip()
-        original_raw_image = raw_image
-        raw_image = raw_image.replace("\\", "/")
-        if "/uploads/" in raw_image and not raw_image.startswith("/uploads/"):
-            raw_image = "/uploads/" + raw_image.split("/uploads/")[-1]
-        if raw_image.startswith("uploads/"):
-            raw_image = "/" + raw_image
-        if raw_image.startswith("/"):
-            raw_image = f"{self.api_base_url.rstrip('/')}{raw_image}"
-        # Avoid broken image icon when backend returns invalid/non-url strings.
-        if raw_image and (
-            raw_image.startswith("http://")
-            or raw_image.startswith("https://")
-            or raw_image.startswith("data:image/")
-        ):
-            normalized["image"] = raw_image
-        else:
-            normalized["image"] = ""
-            if original_raw_image and len(self.image_debug_samples) < 10 and original_raw_image not in self.image_debug_samples:
-                self.image_debug_samples.append(original_raw_image)
+        raw_image = str(normalized.get("image") or normalized.get("image_url") or normalized.get("imagePath") or "").strip()
+        normalized["image"] = self._normalize_image_url(raw_image)
+        if not normalized["image"] and raw_image and len(self.image_debug_samples) < 10 and raw_image not in self.image_debug_samples:
+            self.image_debug_samples.append(raw_image)
         created_raw = str(normalized.get("created_at") or "").strip()
         created_date = created_raw
         created_time = ""
@@ -281,6 +266,20 @@ class AppState(rx.State):
         normalized["created_date"] = created_date
         normalized["created_time"] = created_time
         return normalized
+
+    def _normalize_image_url(self, raw_image: str) -> str:
+        value = str(raw_image or "").strip().replace("\\", "/")
+        if not value:
+            return ""
+        if "/uploads/" in value and not value.startswith("/uploads/"):
+            value = "/uploads/" + value.split("/uploads/")[-1]
+        if value.startswith("uploads/"):
+            value = "/" + value
+        if value.startswith("/"):
+            value = f"{self.api_base_url.rstrip('/')}{value}"
+        if value.startswith(("http://", "https://", "data:image/")):
+            return value
+        return ""
 
     def _normalize_admin_report(self, report: dict) -> dict:
         normalized = dict(report) if isinstance(report, dict) else {}
@@ -298,8 +297,19 @@ class AppState(rx.State):
             normalized["post_description"] = str(post_obj.get("description") or normalized.get("post_description") or "").strip()
             normalized["post_category"] = str(post_obj.get("category") or normalized.get("post_category") or "Uncategorized").strip()
             normalized["post_type"] = str(post_obj.get("type") or normalized.get("post_type") or "").strip()
-            normalized["post_image"] = str(post_obj.get("image") or normalized.get("post_image") or "").strip()
+            try:
+                normalized["post_user_id"] = int(post_obj.get("user_id") or normalized.get("post_user_id") or 0)
+            except Exception:
+                normalized["post_user_id"] = 0
+            report_raw_image = str(post_obj.get("image") or normalized.get("post_image") or "").strip()
+            normalized["post_image"] = self._normalize_image_url(report_raw_image)
             normalized["post_location"] = str(post_obj.get("location") or normalized.get("post_location") or "").strip()
+            owner_obj = post_obj.get("owner") if isinstance(post_obj.get("owner"), dict) else {}
+            owner_active_raw = owner_obj.get("is_active", normalized.get("post_owner_active"))
+            if owner_active_raw is None:
+                normalized["post_owner_active"] = None
+            else:
+                normalized["post_owner_active"] = bool(owner_active_raw)
             created_raw = str(post_obj.get("created_at") or normalized.get("post_created_at") or "").strip()
             created_date = created_raw
             created_time = ""
@@ -321,6 +331,20 @@ class AppState(rx.State):
                 uname = str(u).strip()
         normalized["reporter_username"] = uname
         return normalized
+
+    @staticmethod
+    def _is_post_resolved(post: dict) -> bool:
+        if not isinstance(post, dict):
+            return False
+        value = post.get("is_resolved")
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, int):
+            return value == 1
+        if isinstance(value, str):
+            normalized = value.strip().lower()
+            return normalized in {"1", "true", "yes"}
+        return False
 
     def _saved_ids(self) -> list[int]:
         return [int(x) for x in self.saved_post_ids_data]
@@ -406,8 +430,10 @@ class AppState(rx.State):
                 )
                 total = len(all_items)
 
-            self.search_results = [self._normalize_post(p) for p in all_items]
-            self.search_total = int(total)
+            normalized_results = [self._normalize_post(p) for p in all_items]
+            visible_results = [p for p in normalized_results if not self._is_post_resolved(p)]
+            self.search_results = visible_results
+            self.search_total = len(visible_results)
         except Exception:
             if req_id != self.search_request_seq:
                 return
@@ -526,10 +552,11 @@ class AppState(rx.State):
     @rx.var
     def feed_filtered_posts(self) -> list[dict]:
         saved = set(self._saved_ids())
+        visible_posts = [p for p in self.posts if not self._is_post_resolved(p)]
         if self.feed_filter == "FOUND":
-            posts = [p for p in self.posts if p.get("type") == "FOUND"]
+            posts = [p for p in visible_posts if p.get("type") == "FOUND"]
         else:
-            posts = [p for p in self.posts if p.get("type") == "LOST"]
+            posts = [p for p in visible_posts if p.get("type") == "LOST"]
         result = []
         for p in posts:
             item = dict(p)
@@ -749,14 +776,13 @@ class AppState(rx.State):
         self.post_reply_target_name = ""
         self.post_reply_text = ""
         self.post_report_mode = "report"
-        self.saved_posts = []
-        self.saved_post_ids_data = []
         post_id = self.router.page.params.get("id")
         if not post_id:
             self.error_message = "Không tìm thấy bài viết."
             self.post_loading = False
             return
         try:
+            await self.load_saved_post_ids()
             post_data = await self._request_json("GET", f"/posts/{post_id}", timeout=20.0)
             comments = await self._request_json("GET", f"/comments/post/{post_id}", timeout=20.0)
             self.current_post = self._normalize_post(post_data if isinstance(post_data, dict) else {})
@@ -925,8 +951,9 @@ class AppState(rx.State):
             for row in rows:
                 post = self._normalize_post((row or {}).get("post") or {})
                 if post.get("id"):
-                    posts.append(post)
                     ids.append(int(post.get("id")))
+                    if not self._is_post_resolved(post):
+                        posts.append(post)
             self.saved_posts = posts
             self.saved_post_ids_data = sorted(set(ids))
         except httpx.HTTPStatusError as e:
@@ -1036,6 +1063,9 @@ class AppState(rx.State):
 
     def close_chat(self):
         self.is_chat_open = False
+        self.chat_view = "list"
+        self.current_chat_receiver_id = 0
+        self.current_chat_receiver_name = ""
         self.show_notifications = False
 
     async def load_unread_count(self):
@@ -1084,7 +1114,9 @@ class AppState(rx.State):
         self.chat_view = "chat"
         self.is_chat_open = True
         await self.load_chat_history()
+        self.chat_scroll_tick += 1
         await self.mark_read(receiver_id)
+        await self.load_conversations()
 
     def back_to_conversations(self):
         self.chat_view = "list"
@@ -1112,6 +1144,7 @@ class AppState(rx.State):
                 # Backward-compat if backend still returns list
                 self.chat_messages = payload if isinstance(payload, list) else []
                 self.current_chat_pinned_post = {}
+            self.chat_scroll_tick += 1
         except Exception:
             self.chat_messages = []
             self.current_chat_pinned_post = {}
@@ -1126,7 +1159,10 @@ class AppState(rx.State):
                     headers={"Authorization": f"Bearer {self.token}"},
                 )
                 resp.raise_for_status()
-            self.unread_message_count = int((resp.json() or {}).get("unread_count", 0))
+            remaining = int((resp.json() or {}).get("unread_count", 0))
+            # Keep badge for a short moment so the UX feels smoother.
+            await asyncio.sleep(self.unread_badge_clear_delay_sec)
+            self.unread_message_count = remaining
         except Exception:
             pass
 
@@ -1146,19 +1182,46 @@ class AppState(rx.State):
                 resp.raise_for_status()
             sent = resp.json() or {}
             self.chat_messages = [*self.chat_messages, sent]
+            self.chat_scroll_tick += 1
             self.chat_input = ""
             await self.load_conversations()
         except Exception:
             self.error_message = "Gửi tin nhắn thất bại."
 
     async def refresh_chat_data(self):
-        if self.chat_view == "chat" and self.current_chat_receiver_id:
-            await self.load_chat_history()
-            await self.mark_read(self.current_chat_receiver_id)
+        if self.is_chat_open and self.chat_view == "chat" and self.current_chat_receiver_id:
+            # Realtime while user is inside chat:
+            # only auto-read when the active conversation itself receives new unread messages.
+            await self.load_conversations()
+            active_unread = 0
+            for conv in self.conversations:
+                try:
+                    if int(conv.get("id", 0) or 0) == int(self.current_chat_receiver_id):
+                        active_unread = int(conv.get("unread_count", 0) or 0)
+                        break
+                except Exception:
+                    continue
+
+            await self.load_unread_count()
+            await self.load_notifications()
+
+            if active_unread > 0:
+                await asyncio.sleep(self.chat_realtime_autoread_delay_sec)
+                await self.load_chat_history()
+                await self.mark_read(self.current_chat_receiver_id)
+                await self.load_conversations()
+            else:
+                await self.load_chat_history()
         else:
             await self.load_conversations()
         await self.load_unread_count()
         await self.load_notifications()
+
+    async def trigger_message_ping(self):
+        """Show a brief visual ping for incoming messages."""
+        self.message_ping_active = True
+        await asyncio.sleep(1.5)
+        self.message_ping_active = False
 
     async def init_messages_page(self):
         await self.load_conversations()
@@ -1229,7 +1292,7 @@ class AppState(rx.State):
     def profile_posts_count(self) -> int:
         return len(self.profile_posts)
 
-    async def mark_notification_read_and_open(self, notification_id: int, target_id: int):
+    async def mark_notification_read_and_open(self, notification_id: int, target_id: int, notif_type: str = ""):
         if not self.is_logged_in:
             return
         try:
@@ -1244,6 +1307,12 @@ class AppState(rx.State):
                 for n in self.notifications
             ]
             self.show_notifications = False
+            if (notif_type or "").upper() == "MESSAGE":
+                self.is_chat_open = True
+                self.chat_view = "list"
+                await self.load_conversations()
+                await self.load_unread_count()
+                return
             if target_id:
                 return rx.redirect(f"/post/{target_id}")
         except Exception:
@@ -1727,6 +1796,8 @@ class AppState(rx.State):
             return AppState.load_admin_pending_posts
         if tab == "reports":
             return AppState.load_admin_reports
+        if tab == "locked_users":
+            return AppState.load_admin_locked_users
         return AppState.load_admin_removed_posts
 
     async def load_admin_pending_posts(self):
@@ -1749,8 +1820,25 @@ class AppState(rx.State):
         self.admin_loading = True
         self.admin_action_message = ""
         try:
+            existing_owner_status: dict[int, bool] = {}
+            for item in self.admin_reports:
+                try:
+                    uid = int((item or {}).get("post_user_id") or 0)
+                    active_val = (item or {}).get("post_owner_active")
+                    if uid > 0 and active_val is not None:
+                        existing_owner_status[uid] = bool(active_val)
+                except Exception:
+                    continue
             data = await self._request_json("GET", "/reports", headers={"Authorization": f"Bearer {self.token}"})
-            self.admin_reports = [self._normalize_admin_report(r) for r in data if isinstance(r, dict)]
+            normalized_reports = [self._normalize_admin_report(r) for r in data if isinstance(r, dict)]
+            for item in normalized_reports:
+                try:
+                    uid = int(item.get("post_user_id", 0) or 0)
+                    if uid > 0 and item.get("post_owner_active") is None and uid in existing_owner_status:
+                        item["post_owner_active"] = existing_owner_status[uid]
+                except Exception:
+                    continue
+            self.admin_reports = normalized_reports
         except httpx.HTTPStatusError as e:
             if e.response.status_code == 401: return self.logout()
             self.admin_reports = []
@@ -1773,6 +1861,27 @@ class AppState(rx.State):
             self.admin_removed_posts = []
         except Exception:
             self.admin_removed_posts = []
+        finally:
+            self.admin_loading = False
+
+    async def load_admin_locked_users(self):
+        if not self.is_admin:
+            return
+        self.admin_loading = True
+        self.admin_action_message = ""
+        try:
+            data = await self._request_json(
+                "GET",
+                "/users/locked",
+                headers={"Authorization": f"Bearer {self.token}"},
+            )
+            self.admin_locked_users = [u for u in data if isinstance(u, dict)]
+        except httpx.HTTPStatusError as e:
+            if e.response.status_code == 401:
+                return self.logout()
+            self.admin_locked_users = []
+        except Exception:
+            self.admin_locked_users = []
         finally:
             self.admin_loading = False
 
@@ -1806,8 +1915,13 @@ class AppState(rx.State):
             self.admin_action_message = "Không tìm thấy ID bài viết để gỡ."
             return
         try:
-            await self._request_json("DELETE", f"/posts/{pid}", headers={"Authorization": f"Bearer {self.token}"})
-            self.admin_action_message = f"Đã gỡ bài viết #{pid} thành công."
+            await self._request_json(
+                "PUT",
+                f"/posts/{pid}/moderate",
+                json={"action": "remove"},
+                headers={"Authorization": f"Bearer {self.token}"},
+            )
+            self.admin_action_message = f"Đã chuyển bài viết #{pid} vào mục đã xóa."
             await self.load_posts()
             self.admin_tab = "removed"
             await self.load_admin_removed_posts()
@@ -1831,6 +1945,63 @@ class AppState(rx.State):
             self.admin_action_message = detail or "Không thể gỡ bài viết"
         except Exception:
             self.admin_action_message = "Không thể gỡ bài viết"
+
+    async def admin_mark_report_safe(self, report_id: int):
+        if not self.is_admin:
+            return
+        try:
+            rid = int(report_id) if report_id else 0
+        except Exception:
+            rid = 0
+        if rid <= 0:
+            self.admin_action_message = "Không tìm thấy báo cáo để cập nhật."
+            return
+        try:
+            await self._request_json(
+                "PUT",
+                f"/reports/{rid}/review",
+                headers={"Authorization": f"Bearer {self.token}"},
+            )
+            self.admin_reports = [r for r in self.admin_reports if int(r.get("id", 0) or 0) != rid]
+            self.admin_action_message = "Đã đánh dấu an toàn và ẩn báo cáo."
+        except Exception:
+            self.admin_action_message = "Không thể cập nhật báo cáo."
+
+    async def admin_set_user_active(self, user_id: int, is_active: bool):
+        if not self.is_admin:
+            return
+        try:
+            uid = int(user_id) if user_id else 0
+        except Exception:
+            uid = 0
+        if uid <= 0:
+            self.admin_action_message = "Không tìm thấy người dùng để cập nhật."
+            return
+        try:
+            await self._request_json(
+                "PUT",
+                f"/users/{uid}/status",
+                json={"is_active": bool(is_active)},
+                headers={"Authorization": f"Bearer {self.token}"},
+            )
+            updated_reports: list[dict] = []
+            for report in self.admin_reports:
+                item = dict(report) if isinstance(report, dict) else {}
+                try:
+                    if int(item.get("post_user_id", 0) or 0) == uid:
+                        item["post_owner_active"] = bool(is_active)
+                except Exception:
+                    pass
+                updated_reports.append(item)
+            self.admin_reports = updated_reports
+            self.admin_action_message = (
+                "Đã mở khóa tài khoản người dùng."
+                if bool(is_active)
+                else "Đã khóa tài khoản người dùng do vi phạm lặp lại."
+            )
+            await self.load_admin_locked_users()
+        except Exception:
+            self.admin_action_message = "Không thể cập nhật trạng thái tài khoản."
 
     async def run_health_check(self):
         self.health_status = "checking"

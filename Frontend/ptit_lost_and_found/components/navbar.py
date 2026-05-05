@@ -35,7 +35,11 @@ def navbar() -> rx.Component:
                                 ),
                             ),
                             rx.text(notif.get("created_at"), class_name="text-[10px] text-slate-400 mt-1 block text-left"),
-                            on_click=AppState.mark_notification_read_and_open(notif.get("id"), notif.get("target_id")),
+                            on_click=AppState.mark_notification_read_and_open(
+                                notif.get("id"),
+                                notif.get("target_id"),
+                                notif.get("type"),
+                            ),
                             class_name="w-full px-4 py-3 border-b border-slate-50 hover:bg-slate-50 transition text-left",
                         ),
                     ),
@@ -84,6 +88,12 @@ def navbar() -> rx.Component:
                             rx.icon("message-circle", size=18),
                             on_click=AppState.toggle_chat,
                             class_name="relative p-2 rounded-full text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition",
+                        ),
+                        rx.cond(
+                            AppState.message_ping_active,
+                            rx.el.span(
+                                class_name="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-orange-400 animate-ping",
+                            ),
                         ),
                         rx.cond(
                             AppState.unread_message_count > 0,

@@ -191,11 +191,6 @@ def post_detail_page() -> rx.Component:
                     ),
                     class_name="inline-flex items-center justify-center h-10 bg-[#ff4500] hover:bg-[#e03d00] text-white font-semibold px-4 rounded-xl text-sm shadow-sm",
                 ),
-                rx.link(
-                    "Chi tiết",
-                    href="/post/" + post_id,
-                    class_name="inline-flex items-center justify-center h-10 bg-white hover:bg-slate-50 text-slate-700 font-medium px-4 rounded-xl text-sm border border-slate-200",
-                ),
                 rx.button(
                     rx.cond(AppState.is_current_post_saved, "Đã lưu bài viết", "Lưu bài viết"),
                     on_click=AppState.toggle_saved_post(post.get("id")),

@@ -17,6 +17,9 @@ class ConnectionManager:
     async def send_personal_message(self, message: dict, user_id: int):
         if user_id in self.active_connections:
             websocket = self.active_connections[user_id]
-            await websocket.send_json(message)
+            try:
+                await websocket.send_json(message)
+            except Exception:
+                self.disconnect(user_id)
 
 manager = ConnectionManager()

@@ -22,8 +22,13 @@ LOCATIONS = [
     "Tòa A3",
     "Sảnh A1",
     "Sảnh A2",
-    "Căn tin",
     "Bãi gửi xe",
+    "Sân bóng đá",
+    "Sân bóng chuyền",
+    "Nhà ăn học viện",
+    "Thư viện", 
+    "Sân trước tòa A2",
+    "Sân trước tòa A3",
     "Khác",
 ]
 

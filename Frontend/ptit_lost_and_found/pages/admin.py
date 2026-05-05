@@ -205,6 +205,8 @@ def _admin_removed_post_card(post: dict) -> rx.Component:
 def _admin_report_card(report: dict) -> rx.Component:
     rid = report.get("id", 0)
     pid = report.get("post_id", 0)
+    post_owner_id = report.get("post_user_id", 0)
+    post_owner_active = report.get("post_owner_active", True)
     r_name = report.get("reporter_username", "Người dùng")
     has_image = (report.get("post_image") != None) & (report.get("post_image") != "")
     post_type = rx.cond(report.get("post_type") == "LOST", "Mất đồ", "Nhặt được")
@@ -244,6 +246,13 @@ def _admin_report_card(report: dict) -> rx.Component:
                 rx.hstack(
                     rx.text("Người đăng:", class_name="text-sm font-semibold text-slate-500 min-w-[74px]"),
                     rx.text("Người dùng", class_name="text-sm font-bold text-[#ff4500]"),
+                    rx.cond(
+                        post_owner_active == False,
+                        rx.el.span(
+                            "Đã khóa",
+                            class_name="text-[10px] font-semibold px-2 py-1 rounded-full text-red-700 bg-red-50 border border-red-200",
+                        ),
+                    ),
                     spacing="2",
                     align="center",
                     width="100%",
@@ -319,9 +328,26 @@ def _admin_report_card(report: dict) -> rx.Component:
                         class_name="inline-flex items-center justify-center h-10 min-w-[110px] text-xs font-semibold text-blue-600 bg-blue-50 px-3 py-2 rounded-lg hover:bg-blue-100 transition-all",
                     ),
                     rx.button(
+                        rx.cond(post_owner_active == False, "MỞ KHÓA TÀI KHOẢN", "KHÓA TÀI KHOẢN"),
+                        on_click=AppState.admin_set_user_active(post_owner_id, post_owner_active == False),
+                        class_name=rx.cond(
+                            post_owner_active == False,
+                            "inline-flex items-center justify-center h-10 min-w-[150px] text-xs font-semibold text-emerald-700 bg-emerald-50 px-3 py-2 rounded-lg hover:bg-emerald-100 transition-all",
+                            "inline-flex items-center justify-center h-10 min-w-[150px] text-xs font-semibold text-amber-700 bg-amber-50 px-3 py-2 rounded-lg hover:bg-amber-100 transition-all",
+                        ),
+                    ),
+                    rx.button(
+                        "ĐÁNH GIÁ AN TOÀN",
+                        on_click=AppState.admin_mark_report_safe(rid),
+                        class_name="inline-flex items-center justify-center h-10 min-w-[140px] text-xs font-semibold text-emerald-700 bg-emerald-50 px-3 py-2 rounded-lg hover:bg-emerald-100 transition-all",
+                    ),
+                    rx.cond(
+                        post_owner_active != False,
+                        rx.button(
                         "GỠ BÀI VIẾT",
                         on_click=AppState.admin_delete_post_report(pid, rid),
                         class_name="inline-flex items-center justify-center h-10 min-w-[110px] text-xs font-semibold text-red-600 bg-red-50 px-3 py-2 rounded-lg hover:bg-red-100 transition-all",
+                        ),
                     ),
                     spacing="2",
                     class_name="mt-3",
@@ -331,6 +357,55 @@ def _admin_report_card(report: dict) -> rx.Component:
             class_name="w-full group flex flex-col md:flex-row gap-5 p-4 border border-slate-200 rounded-2xl hover:border-slate-300 hover:shadow-sm transition-all bg-white",
         ),
         class_name="w-full",
+    )
+
+
+def _admin_locked_user_card(user: dict) -> rx.Component:
+    uid = user.get("id", 0)
+    return rx.el.div(
+        rx.hstack(
+            rx.vstack(
+                rx.hstack(
+                    rx.text("Tài khoản:", class_name="text-sm font-semibold text-slate-500 min-w-[90px]"),
+                    rx.text(user.get("username"), class_name="text-sm font-bold text-slate-900"),
+                    rx.el.span(
+                        "Đang khóa",
+                        class_name="text-[10px] font-semibold px-2 py-1 rounded-full text-red-700 bg-red-50 border border-red-200",
+                    ),
+                    spacing="2",
+                    align="center",
+                    width="100%",
+                ),
+                rx.hstack(
+                    rx.text("Email:", class_name="text-sm font-semibold text-slate-500 min-w-[90px]"),
+                    rx.text(user.get("email"), class_name="text-sm text-slate-700"),
+                    spacing="2",
+                    align="center",
+                    width="100%",
+                ),
+                rx.hstack(
+                    rx.text("Ngày tạo:", class_name="text-sm font-semibold text-slate-500 min-w-[90px]"),
+                    rx.text(user.get("created_at"), class_name="text-xs text-slate-500"),
+                    spacing="2",
+                    align="center",
+                    width="100%",
+                ),
+                spacing="2",
+                align="start",
+                width="100%",
+            ),
+            rx.button(
+                "MỞ KHÓA TÀI KHOẢN",
+                on_click=AppState.admin_set_user_active(uid, True),
+                class_name="inline-flex items-center justify-center h-10 min-w-[170px] text-xs font-semibold text-emerald-700 bg-emerald-50 px-3 py-2 rounded-lg hover:bg-emerald-100 transition-all",
+            ),
+            justify="between",
+            align="center",
+            width="100%",
+            wrap="wrap",
+            spacing="3",
+        ),
+        class_name="w-full p-4 border border-slate-200 rounded-2xl bg-white",
     )
 
 def admin_page() -> rx.Component:
@@ -376,6 +451,15 @@ def admin_page() -> rx.Component:
                                         "bg-[#ff4500] text-white px-4 py-2 rounded-full text-sm font-bold shadow-md transition-all",
                                         "bg-white text-slate-600 border border-slate-200 px-4 py-2 rounded-full text-sm font-medium hover:bg-slate-50 transition-all"
                                     )
+                                ),
+                                rx.button(
+                                    "Tài khoản bị khóa",
+                                    on_click=lambda: AppState.set_admin_tab("locked_users"),
+                                    class_name=rx.cond(
+                                        AppState.admin_tab == "locked_users",
+                                        "bg-[#ff4500] text-white px-4 py-2 rounded-full text-sm font-bold shadow-md transition-all",
+                                        "bg-white text-slate-600 border border-slate-200 px-4 py-2 rounded-full text-sm font-medium hover:bg-slate-50 transition-all",
+                                    ),
                                 ),
                                 spacing="3",
                                 class_name="mb-6"
@@ -437,26 +521,49 @@ def admin_page() -> rx.Component:
                                             ),
                                             width="100%"
                                         ),
-                                        # TAB REMOVED
-                                        rx.vstack(
-                                            rx.cond(
-                                                AppState.admin_removed_posts.length() == 0,
-                                                rx.center(
-                                                    rx.vstack(
-                                                        rx.icon("archive-x", size=48, class_name="text-slate-200"),
-                                                        rx.text("Chưa có bài nào trong mục đã xóa.", class_name="text-slate-400 font-medium"),
-                                                        align="center"
+                                        rx.cond(
+                                            AppState.admin_tab == "removed",
+                                            # TAB REMOVED
+                                            rx.vstack(
+                                                rx.cond(
+                                                    AppState.admin_removed_posts.length() == 0,
+                                                    rx.center(
+                                                        rx.vstack(
+                                                            rx.icon("archive-x", size=48, class_name="text-slate-200"),
+                                                            rx.text("Chưa có bài nào trong mục đã xóa.", class_name="text-slate-400 font-medium"),
+                                                            align="center"
+                                                        ),
+                                                        class_name="py-20 w-full"
                                                     ),
-                                                    class_name="py-20 w-full"
+                                                    rx.vstack(
+                                                        rx.foreach(AppState.admin_removed_posts, _admin_removed_post_card),
+                                                        spacing="4",
+                                                        width="100%"
+                                                    )
                                                 ),
-                                                rx.vstack(
-                                                    rx.foreach(AppState.admin_removed_posts, _admin_removed_post_card),
-                                                    spacing="4",
-                                                    width="100%"
-                                                )
+                                                width="100%"
                                             ),
-                                            width="100%"
-                                        )
+                                            # TAB LOCKED USERS
+                                            rx.vstack(
+                                                rx.cond(
+                                                    AppState.admin_locked_users.length() == 0,
+                                                    rx.center(
+                                                        rx.vstack(
+                                                            rx.icon("user-check", size=48, class_name="text-slate-200"),
+                                                            rx.text("Không có tài khoản nào đang bị khóa.", class_name="text-slate-400 font-medium"),
+                                                            align="center",
+                                                        ),
+                                                        class_name="py-20 w-full",
+                                                    ),
+                                                    rx.vstack(
+                                                        rx.foreach(AppState.admin_locked_users, _admin_locked_user_card),
+                                                        spacing="4",
+                                                        width="100%",
+                                                    ),
+                                                ),
+                                                width="100%",
+                                            ),
+                                        ),
                                     )
                                 )
                             ),

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String, DateTime, Boolean
 from sqlalchemy.orm import relationship
 from app.database.database import Base
 from datetime import datetime
@@ -11,6 +11,7 @@ class User(Base):
     email = Column(String, unique=True)
     password_hash = Column(String)
     role = Column(String, default="USER", nullable=False)  # USER / MOD / ADMIN
+    is_active = Column(Boolean, default=True, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     posts = relationship("Post", back_populates="owner", cascade="all, delete-orphan", foreign_keys="[Post.user_id]")
